@@ -6,7 +6,6 @@ import { useAuth } from '@/context/AuthContext';
 import { initialPosts } from '@/data/community-posts';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import Link from 'next/link';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -16,7 +15,6 @@ export default function CommunityPage() {
   const { user, firebaseEnabled } = useAuth();
   const [posts, setPosts] = useState(initialPosts);
   const [newQuestion, setNewQuestion] = useState('');
-  const [newTags, setNewTags] = useState('');
 
   const handleAskQuestion = (e) => {
     e.preventDefault();
@@ -24,22 +22,18 @@ export default function CommunityPage() {
     const newPost = {
       id: Date.now(),
       author: user?.email?.split('@')[0] || 'Anonymous Farmer',
-      avatar: `https://api.dicebear.com/8.x/initials/svg?seed=${user?.email || 'A'}`,
       question: newQuestion,
-      tags: newTags.split(',').map(tag => tag.trim()).filter(Boolean),
       timestamp: 'Just now',
       answers: [],
     };
     setPosts([newPost, ...posts]);
     setNewQuestion('');
-    setNewTags('');
   };
 
   const handleAddAnswer = (postId, answerText) => {
     const newAnswer = {
       id: Date.now(),
       author: user?.email?.split('@')[0] || 'Anonymous Farmer',
-      avatar: `https://api.dicebear.com/8.x/initials/svg?seed=${user?.email || 'A'}`,
       answer: answerText,
       timestamp: 'Just now',
       upvotes: 0,
@@ -88,11 +82,6 @@ export default function CommunityPage() {
                     onChange={(e) => setNewQuestion(e.target.value)}
                     rows={4}
                     required
-                />
-                <Input
-                    placeholder="Add tags, separated by commas (e.g., rice, bihar, pest-control)"
-                    value={newTags}
-                    onChange={(e) => setNewTags(e.target.value)}
                 />
                 </CardContent>
                 <CardFooter>

@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState } from 'react';
-import Image from 'next/image';
 import { ThumbsUp } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -22,25 +21,16 @@ export default function PostCard({ post, onAddAnswer, onUpvoteAnswer }) {
   return (
     <Card className="bg-white">
       <CardHeader>
-        <div className="flex gap-4">
-          <Image src={post.avatar} alt={post.author} width={40} height={40} className="rounded-full bg-muted" data-ai-hint="person face" />
-          <div>
-            <CardTitle className="text-lg">{post.question}</CardTitle>
-            <CardDescription>
-              Asked by <span className="font-semibold text-primary">{post.author}</span> • {post.timestamp}
-            </CardDescription>
-          </div>
-        </div>
-        <div className="flex flex-wrap gap-2 mt-4">
-          {post.tags.map(tag => (
-            <span key={tag} className="bg-muted text-muted-foreground text-xs font-medium px-2 py-1 rounded-full">#{tag}</span>
-          ))}
+        <div>
+          <CardTitle className="text-lg">{post.question}</CardTitle>
+          <CardDescription>
+            Asked by <span className="font-semibold text-primary">{post.author}</span> • {post.timestamp}
+          </CardDescription>
         </div>
       </CardHeader>
-      <CardContent className="space-y-4 pl-8">
+      <CardContent className="space-y-4">
         {post.answers.map((answer, index) => (
           <div key={answer.id} className={`flex gap-4 ${index > 0 ? 'border-t pt-4' : ''}`}>
-            <Image src={answer.avatar} alt={answer.author} width={40} height={40} className="rounded-full bg-muted" data-ai-hint="person face" />
             <div className="flex-1">
               <p className="text-muted-foreground whitespace-pre-wrap">{answer.answer}</p>
               <div className="flex justify-between items-center mt-2 text-sm">
@@ -59,9 +49,8 @@ export default function PostCard({ post, onAddAnswer, onUpvoteAnswer }) {
         )}
       </CardContent>
       {user && firebaseEnabled && (
-        <CardFooter className="pl-8">
+        <CardFooter>
           <form onSubmit={onAnswerSubmit} className="w-full flex items-start gap-4">
-            <Image src={`https://api.dicebear.com/8.x/initials/svg?seed=${user?.email || 'A'}`} alt={user?.email || 'user'} width={40} height={40} className="rounded-full bg-muted" />
             <div className="flex-1 space-y-2">
                 <Textarea
                 placeholder="Write your answer..."

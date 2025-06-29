@@ -63,6 +63,13 @@ const features = [
       description: 'Find eligible subsidies and government schemes for your farming needs.',
       href: '/govt-schemes',
       color: 'bg-indigo-500'
+    },
+    {
+      icon: Users,
+      title: 'Community Forum',
+      description: 'Ask questions and get answers from fellow farmers and agri-experts.',
+      href: '/community',
+      color: 'bg-yellow-500'
     }
 ];
 
@@ -145,7 +152,7 @@ export default function Home() {
                 </p>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                 {features.map((feature, index) => (
                   <Link
                     key={index}
