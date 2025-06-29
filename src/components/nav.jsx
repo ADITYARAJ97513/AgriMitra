@@ -13,7 +13,7 @@ export function Nav() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
-  const { user, loading, logout, firebaseEnabled } = useAuth();
+  const { user, loading, logout } = useAuth();
 
   const navItems = [
     { href: '/', label: 'Home' },
@@ -65,8 +65,7 @@ export function Nav() {
 
           <div className="flex items-center gap-2">
              <div className="hidden lg:flex items-center gap-2">
-              {firebaseEnabled && (
-                loading ? (
+              {loading ? (
                   <Skeleton className="h-8 w-24 rounded-md" />
                 ) : user ? (
                   <>
@@ -85,7 +84,7 @@ export function Nav() {
                     </Button>
                   </>
                 )
-              )}
+              }
              </div>
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -117,8 +116,7 @@ export function Nav() {
                 </li>
               ))}
                <li className="pt-4 mt-4 border-t">
-                {firebaseEnabled && (
-                    loading ? (
+                {loading ? (
                     <Skeleton className="h-10 w-full" />
                     ) : user ? (
                     <div className="flex flex-col gap-2">
@@ -140,7 +138,7 @@ export function Nav() {
                         </Button>
                     </div>
                     )
-                )}
+                }
               </li>
             </ul>
           </div>
