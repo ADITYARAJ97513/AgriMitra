@@ -10,7 +10,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import { getFertilizerAndSoilAdvice } from '@/ai/flows/fertilizer-and-soil-ai';
-import { FlaskConical } from 'lucide-react';
+import { FlaskConical, Lightbulb } from 'lucide-react';
 import React, { useState } from 'react';
 import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
@@ -60,6 +60,31 @@ export default function FertilizerSoilPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const renderSuggestions = (suggestions) => {
+    if (!suggestions) return null;
+
+    if (Array.isArray(suggestions)) {
+      return (
+        <ul className="space-y-3 text-muted-foreground">
+          {suggestions.map((item, index) => (
+            <li key={index} className="flex gap-3 p-3 bg-primary/5 rounded-lg border border-primary/10">
+              <Lightbulb className="h-5 w-5 text-amber-500 flex-shrink-0 mt-1" />
+              <span>
+                {typeof item === 'object' && item.suggestion ? item.suggestion : item}
+              </span>
+            </li>
+          ))}
+        </ul>
+      );
+    }
+
+    if (typeof suggestions === 'string') {
+      return <p className="text-muted-foreground whitespace-pre-wrap">{suggestions}</p>;
+    }
+
+    return <p className="text-muted-foreground">No suggestions available.</p>;
   };
 
   return (
@@ -135,11 +160,11 @@ export default function FertilizerSoilPage() {
             <CardContent className="space-y-6">
                 <div>
                     <h3 className="font-semibold text-lg mb-2">Fertilizer Suggestions</h3>
-                    <p className="text-muted-foreground whitespace-pre-wrap">{result.fertilizerSuggestions}</p>
+                    {renderSuggestions(result.fertilizerSuggestions)}
                 </div>
                  <div>
                     <h3 className="font-semibold text-lg mb-2">Soil Improvement Suggestions</h3>
-                    <p className="text-muted-foreground whitespace-pre-wrap">{result.soilImprovementSuggestions}</p>
+                    {renderSuggestions(result.soilImprovementSuggestions)}
                 </div>
             </CardContent>
           </Card>
