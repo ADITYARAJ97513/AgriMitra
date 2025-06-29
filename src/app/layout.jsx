@@ -2,6 +2,7 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import { cn } from '@/lib/utils';
 import { Nav } from '@/components/nav';
+import { Footer } from '@/components/footer';
 
 export const metadata = {
   title: 'AgriMitraAI',
@@ -19,10 +20,13 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=PT+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet" />
       </head>
       <body className={cn("font-sans antialiased bg-background/50")}>
-        <Nav />
-        <main className="pt-16">
-          {children}
-        </main>
+        <div className="flex flex-col min-h-screen">
+          <Nav />
+          <main className="flex-grow pt-16">
+            {children}
+          </main>
+          <Footer />
+        </div>
         <Toaster />
       </body>
     </html>
