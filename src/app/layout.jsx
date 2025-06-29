@@ -3,6 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { cn } from '@/lib/utils';
 import { Nav } from '@/components/nav';
 import { Footer } from '@/components/footer';
+import { AuthProvider } from '@/context/AuthContext';
 
 export const metadata = {
   title: 'AgriMitraAI',
@@ -20,14 +21,16 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=PT+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet" />
       </head>
       <body className={cn("font-sans antialiased bg-background/50")}>
-        <div className="flex flex-col min-h-screen">
-          <Nav />
-          <main className="flex-grow pt-16">
-            {children}
-          </main>
-          <Footer />
-        </div>
-        <Toaster />
+        <AuthProvider>
+          <div className="flex flex-col min-h-screen">
+            <Nav />
+            <main className="flex-grow pt-16">
+              {children}
+            </main>
+            <Footer />
+          </div>
+          <Toaster />
+        </AuthProvider>
       </body>
     </html>
   );
