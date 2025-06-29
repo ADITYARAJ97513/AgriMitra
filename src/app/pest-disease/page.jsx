@@ -52,11 +52,22 @@ export default function PestDiseasePage() {
     return (
       <div>
         <h3 className="font-semibold text-lg mb-2 flex items-center gap-2"><Icon className="h-5 w-5 text-primary" />{title}</h3>
-        <ul className="space-y-3 text-muted-foreground pl-4">
+        <ul className="space-y-4 text-muted-foreground pl-4">
           {items.map((item, index) => (
             <li key={index} className="flex gap-3">
-              <span className="font-semibold text-primary"> • </span>
-              <span>{item}</span>
+              <span className="font-semibold text-primary mt-1"> • </span>
+              {typeof item === 'object' && item !== null ? (
+                <div className="flex flex-col">
+                  <span className="font-medium text-foreground">{item.recommendation || item.name}</span>
+                  {item.description && <span className="text-sm">{item.description}</span>}
+                  <div className="flex flex-wrap gap-2 mt-1">
+                    {item.dosage && <span className="text-xs font-mono p-1 bg-muted rounded">Dosage: {item.dosage}</span>}
+                    {item.applicationTiming && <span className="text-xs font-mono p-1 bg-muted rounded">Timing: {item.applicationTiming}</span>}
+                  </div>
+                </div>
+              ) : (
+                <span>{item}</span>
+              )}
             </li>
           ))}
         </ul>
