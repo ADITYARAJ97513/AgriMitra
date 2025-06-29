@@ -210,8 +210,8 @@ export default function Home() {
                         <Users className="h-6 w-6 text-orange-600" />
                       </div>
                       <div>
-                        <h3 className="text-lg font-semibold text-gray-900 mb-2">Community Support</h3>
-                        <p className="text-gray-600">Connect with fellow farmers and agricultural experts for shared learning.</p>
+                        <h3 className="text-lg font-semibold text-gray-900 mb-2">Peer-to-Peer Forum</h3>
+                        <p className="text-gray-600">Ask questions and get trusted answers from a community of verified farmers and agri-experts. Your contributions help build a trusted knowledge base for everyone.</p>
                       </div>
                     </div>
                   </div>

@@ -24,6 +24,7 @@ export function Nav() {
     { href: '/market-yield', label: 'Market' },
     { href: '/disease-detection', label: 'Disease Detection' },
     { href: '/govt-schemes', label: 'Subsidies' },
+    { href: '/community', label: 'Community' },
   ];
 
   const handleLogout = async () => {

@@ -31,7 +31,7 @@ export function Footer() {
               <li><Link href="/crop-advisor" className="text-green-200 hover:text-white transition-colors">Crop Advisor</Link></li>
               <li><Link href="/fertilizer-soil" className="text-green-200 hover:text-white transition-colors">Fertilizer Guide</Link></li>
               <li><Link href="/pest-disease" className="text-green-200 hover:text-white transition-colors">Pest Control</Link></li>
-              <li><Link href="/weather-watch" className="text-green-200 hover:text-white transition-colors">Weather Watch</Link></li>
+               <li><Link href="/community" className="text-green-200 hover:text-white transition-colors">Community Forum</Link></li>
               <li><Link href="/market-yield" className="text-green-200 hover:text-white transition-colors">Market</Link></li>
               <li><Link href="/govt-schemes" className="text-green-200 hover:text-white transition-colors">Subsidies</Link></li>
             </ul>
