@@ -8,7 +8,7 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 
-export const MarketAndYieldForecastInputSchema = z.object({
+const MarketAndYieldForecastInputSchema = z.object({
   cropName: z.string().describe('Name of the crop.'),
   location: z.string().describe('Location (District, State) for market price context.'),
   landSize: z.string().describe('Land size in acres.'),
@@ -19,7 +19,7 @@ export const MarketAndYieldForecastInputSchema = z.object({
   mandiPreference: z.string().optional().describe('Preferred local market (mandi).'),
 });
 
-export const MarketAndYieldForecastOutputSchema = z.object({
+const MarketAndYieldForecastOutputSchema = z.object({
   yieldEstimation: z.string().describe('An estimated yield for the crop in quintals or tons per acre.'),
   marketAdvice: z.string().describe('Advice on expected market prices, demand, and best time/place to sell.'),
   profitAnalysis: z.string().describe('A simple profit analysis if input costs are provided, otherwise an empty string.'),

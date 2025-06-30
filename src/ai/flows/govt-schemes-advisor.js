@@ -8,14 +8,14 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 
-export const GetGovtSchemesInputSchema = z.object({
+const GetGovtSchemesInputSchema = z.object({
   state: z.string().describe("The farmer's state of residence."),
   landholdingSize: z.string().describe('The size of landholding in acres.'),
   cropsGrown: z.string().describe('The main crops grown by the farmer.'),
   farmerCategory: z.string().describe('The category of the farmer (e.g., Small and Marginal, Medium, Large).'),
 });
 
-export const GetGovtSchemesOutputSchema = z.object({
+const GetGovtSchemesOutputSchema = z.object({
   schemes: z.array(
     z.object({
       name: z.string().describe('The official name of the government scheme.'),

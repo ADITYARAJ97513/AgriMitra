@@ -8,7 +8,7 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 
-export const PestAndDiseaseAIInputSchema = z.object({
+const PestAndDiseaseAIInputSchema = z.object({
   cropType: z.string().describe('The type of crop being grown.'),
   growthStage: z.string().describe('The current growth stage of the crop.'),
   symptomsObserved: z.string().describe('Any observed symptoms on the plants.'),
@@ -17,7 +17,7 @@ export const PestAndDiseaseAIInputSchema = z.object({
   chemicalsUsedEarlier: z.string().optional().describe('Any chemicals used recently.'),
 });
 
-export const PestAndDiseaseAIOutputSchema = z.object({
+const PestAndDiseaseAIOutputSchema = z.object({
   pestThreats: z.array(z.string()).describe('A list of likely pest threats based on the input.'),
   diseaseThreats: z.array(z.string()).describe('A list of likely disease threats based on the input.'),
   preventativeMeasures: z.array(z.string()).describe('A list of measures to prevent these issues.'),

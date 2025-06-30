@@ -7,7 +7,7 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 
-export const RecommendCropsInputSchema = z.object({
+const RecommendCropsInputSchema = z.object({
   location: z.string().describe('The farmer\'s location, e.g., Patna, Bihar'),
   soilType: z.string().describe('The type of soil, e.g., Alluvial, Black, Red'),
   season: z.string().describe('The current farming season, e.g., Kharif, Rabi, Zaid'),
@@ -18,7 +18,7 @@ export const RecommendCropsInputSchema = z.object({
   pastCrops: z.string().optional().describe('Crops grown in the past for rotation advice'),
 });
 
-export const RecommendCropsOutputSchema = z.object({
+const RecommendCropsOutputSchema = z.object({
   crops: z.array(z.string()).describe('A list of 3-4 recommended crops suitable for the conditions.'),
   fertilizerSuggestions: z.string().describe('Specific fertilizer advice for the top recommended crop.'),
   pestDiseaseControl: z.string().describe('Common pest and disease control measures for the recommended crops.'),

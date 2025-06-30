@@ -8,7 +8,7 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 
-export const DetectPlantDiseaseInputSchema = z.object({
+const DetectPlantDiseaseInputSchema = z.object({
   photoDataUri: z.string().describe("A photo of a plant leaf, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."),
   cropType: z.string().describe('The type of crop.'),
   growthStage: z.string().describe('The growth stage of the crop.'),
@@ -16,7 +16,7 @@ export const DetectPlantDiseaseInputSchema = z.object({
   symptomsObserved: z.string().optional().describe('Additional symptoms observed by the farmer.'),
 });
 
-export const DetectPlantDiseaseOutputSchema = z.object({
+const DetectPlantDiseaseOutputSchema = z.object({
   isPlant: z.boolean().describe('Whether a plant leaf is detected in the image.'),
   disease: z.string().describe('The name of the detected disease, or "Healthy" if no disease is found.'),
   description: z.string().describe('A description of the disease and its symptoms.'),

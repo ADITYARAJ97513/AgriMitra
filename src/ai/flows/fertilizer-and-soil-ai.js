@@ -8,7 +8,7 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 
-export const FertilizerAndSoilAdviceInputSchema = z.object({
+const FertilizerAndSoilAdviceInputSchema = z.object({
   cropSelected: z.string().describe('The crop the farmer is growing.'),
   soilType: z.string().describe('The type of soil.'),
   landSize: z.string().describe('The size of the land in acres.'),
@@ -21,7 +21,7 @@ export const FertilizerAndSoilAdviceInputSchema = z.object({
   pH: z.number().optional().describe('Soil pH, if available.'),
 });
 
-export const FertilizerAndSoilAdviceOutputSchema = z.object({
+const FertilizerAndSoilAdviceOutputSchema = z.object({
   fertilizerSuggestions: z.array(z.object({ suggestion: z.string() })).describe('A list of specific fertilizer suggestions with application details.'),
   soilImprovementSuggestions: z.array(z.object({ suggestion: z.string() })).describe('A list of suggestions to improve overall soil health.'),
 });
