@@ -39,7 +39,7 @@ const getAuthErrorMessage = (error) => {
         case 'auth/weak-password':
             return 'The password is too weak. Please choose a stronger password.';
         case 'auth/invalid-phone-number':
-            return 'Invalid phone number format. Please include the country code (e.g., +91).';
+            return 'Invalid phone number format. Please check the number and try again.';
         case 'auth/too-many-requests':
             return 'Too many requests from this device. Please try again later.';
         case 'auth/invalid-verification-code':
@@ -61,7 +61,8 @@ export default function LoginPage() {
   const [googleLoading, setGoogleLoading] = useState(false);
 
   // Phone auth state
-  const [phone, setPhone] = useState('');
+  const [countryCode, setCountryCode] = useState('91');
+  const [phoneNumber, setPhoneNumber] = useState('');
   const [otp, setOtp] = useState('');
   const [confirmationResult, setConfirmationResult] = useState(null);
   const [otpSent, setOtpSent] = useState(false);
@@ -93,10 +94,11 @@ export default function LoginPage() {
   const handleSendOtp = async (e) => {
     e.preventDefault();
     setPhoneLoading(true);
+    const fullPhoneNumber = `+${countryCode}${phoneNumber}`;
     try {
         generateRecaptcha();
         const appVerifier = window.recaptchaVerifier;
-        const result = await signInWithPhoneNumber(auth, phone, appVerifier);
+        const result = await signInWithPhoneNumber(auth, fullPhoneNumber, appVerifier);
         setConfirmationResult(result);
         setOtpSent(true);
         toast({ title: 'OTP Sent!', description: 'Please check your phone for the one-time password.' });
@@ -261,8 +263,30 @@ export default function LoginPage() {
                 {!otpSent ? (
                   <div className="space-y-2">
                     <Label htmlFor="phone">Phone Number</Label>
-                    <Input id="phone" type="tel" placeholder="+91 12345 67890" value={phone} onChange={(e) => setPhone(e.target.value)} required />
-                    <p className="text-sm text-muted-foreground">Include country code.</p>
+                    <div className="flex gap-2">
+                      <div className="relative w-20">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">+</span>
+                        <Input 
+                          id="country-code" 
+                          type="text" 
+                          placeholder="91" 
+                          value={countryCode} 
+                          onChange={(e) => setCountryCode(e.target.value)} 
+                          required 
+                          className="pl-6"
+                        />
+                      </div>
+                      <Input 
+                        id="phone" 
+                        type="tel" 
+                        placeholder="12345 67890" 
+                        value={phoneNumber} 
+                        onChange={(e) => setPhoneNumber(e.target.value)} 
+                        required 
+                        className="flex-1"
+                      />
+                    </div>
+                    <p className="text-sm text-muted-foreground">Enter country code and phone number separately.</p>
                   </div>
                 ) : (
                   <div className="space-y-2">
