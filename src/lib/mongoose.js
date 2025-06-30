@@ -1,5 +1,11 @@
 
 import mongoose from 'mongoose';
+import dotenv from 'dotenv';
+
+// Explicitly load environment variables.
+// This is a failsafe for environments where .env isn't loaded automatically.
+dotenv.config({ path: process.cwd() + '/.env' });
+
 
 const MONGODB_URI = process.env.MONGODB_URI;
 

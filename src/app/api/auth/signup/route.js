@@ -20,6 +20,12 @@ export async function POST(request) {
     return NextResponse.json({ message: 'User created successfully' }, { status: 201 });
   } catch (error) {
     console.error('Signup error:', error);
-    return NextResponse.json({ message: 'An unexpected error occurred.' }, { status: 500 });
+    
+    // Check for MongoDB duplicate key error, which can happen in a race condition.
+    if (error.code === 11000 && error.keyPattern?.username) {
+        return NextResponse.json({ message: 'This username is already taken. Please choose another.' }, { status: 409 });
+    }
+
+    return NextResponse.json({ message: 'An unexpected error occurred on the server.' }, { status: 500 });
   }
 }
