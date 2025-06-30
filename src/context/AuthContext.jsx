@@ -5,6 +5,8 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
+  GoogleAuthProvider,
+  signInWithPopup,
 } from 'firebase/auth';
 import { auth, firebaseEnabled } from '@/lib/firebase';
 
@@ -44,6 +46,14 @@ export const AuthProvider = ({ children }) => {
     }
     return signInWithEmailAndPassword(auth, email, password);
   };
+  
+  const loginWithGoogle = () => {
+    if (!firebaseEnabled) {
+        return Promise.reject(new Error('Firebase is not configured.'));
+    }
+    const provider = new GoogleAuthProvider();
+    return signInWithPopup(auth, provider);
+  };
 
   const logout = async () => {
     setUser(null);
@@ -52,7 +62,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, signup, login, logout, firebaseEnabled }}>
+    <AuthContext.Provider value={{ user, loading, signup, login, logout, firebaseEnabled, loginWithGoogle }}>
       {children}
     </AuthContext.Provider>
   );
