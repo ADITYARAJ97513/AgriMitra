@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils';
 import { Nav } from '@/components/nav';
 import { Footer } from '@/components/footer';
 import { AuthProvider } from '@/context/AuthContext';
+import AuthGuard from '@/components/AuthGuard';
 
 export const metadata = {
   title: 'AgriMitraAI',
@@ -25,7 +26,7 @@ export default function RootLayout({
           <div className="flex flex-col min-h-screen">
             <Nav />
             <main className="flex-grow pt-16">
-              {children}
+              <AuthGuard>{children}</AuthGuard>
             </main>
             <Footer />
           </div>

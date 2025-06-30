@@ -14,6 +14,11 @@ export function Nav() {
   const pathname = usePathname();
   const router = useRouter();
   const { user, loading, logout } = useAuth();
+  
+  const publicPaths = ['/login', '/signup'];
+  if (publicPaths.includes(pathname)) {
+    return null;
+  }
 
   const navItems = [
     { href: '/', label: 'Home' },

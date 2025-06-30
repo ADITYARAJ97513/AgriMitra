@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
@@ -51,18 +51,24 @@ const getAuthErrorMessage = (error) => {
 
 
 export default function LoginPage() {
-  const { login, loginWithGoogle, firebaseEnabled } = useAuth();
+  const { user, loading, login, loginWithGoogle, firebaseEnabled } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
-  const [loading, setLoading] = useState(false);
   const [phoneLoading, setPhoneLoading] = useState(false);
+  const [emailLoading, setEmailLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
 
   // Phone auth state
   const [phone, setPhone] = useState('');
   const [otp, setOtp] = useState('');
   const [confirmationResult, setConfirmationResult] = useState(null);
   const [otpSent, setOtpSent] = useState(false);
-
+  
+  useEffect(() => {
+    if (!loading && user) {
+      router.push('/');
+    }
+  }, [user, loading, router]);
 
   const form = useForm({
     defaultValues: {
@@ -117,7 +123,7 @@ export default function LoginPage() {
   };
 
   const handleGoogleLogin = async () => {
-      setLoading(true);
+      setGoogleLoading(true);
       try {
           await loginWithGoogle();
           toast({
@@ -133,12 +139,12 @@ export default function LoginPage() {
           });
           console.error(error);
       } finally {
-          setLoading(false);
+          setGoogleLoading(false);
       }
   }
 
   const onEmailSubmit = async (values) => {
-    setLoading(true);
+    setEmailLoading(true);
     try {
       await login(values.email, values.password);
       toast({
@@ -154,13 +160,21 @@ export default function LoginPage() {
       });
       console.error(error);
     } finally {
-      setLoading(false);
+      setEmailLoading(false);
     }
   };
 
+  if (loading || user) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center">
+        <Loader2 className="h-16 w-16 animate-spin text-primary" />
+      </div>
+    );
+  }
+
   if (!firebaseEnabled) {
     return (
-      <div className="flex items-center justify-center min-h-[calc(100vh-8rem)] py-12 px-4">
+      <div className="flex items-center justify-center min-h-screen py-12 px-4">
         <Alert className="max-w-md">
             <Terminal className="h-4 w-4" />
             <AlertTitle>Firebase Not Configured</AlertTitle>
@@ -173,15 +187,20 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-[calc(100vh-8rem)] py-12 px-4">
+    <div className="flex items-center justify-center min-h-screen py-12 px-4 bg-gray-50/50">
       <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle>Login</CardTitle>
+        <CardHeader className="text-center">
+            <div className="mx-auto bg-primary p-2 rounded-lg inline-block mb-4">
+                <Link href="/" aria-label="Home">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6 text-primary-foreground"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"></path><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"></path></svg>
+                </Link>
+            </div>
+          <CardTitle>Welcome Back to AgriMitraAI</CardTitle>
           <CardDescription>Choose a method to access your account.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <Button variant="outline" className="w-full" onClick={handleGoogleLogin} disabled={loading || phoneLoading}>
-            {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <GoogleIcon className="mr-2 h-4 w-4" />}
+          <Button variant="outline" className="w-full" onClick={handleGoogleLogin} disabled={emailLoading || phoneLoading || googleLoading}>
+            {googleLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <GoogleIcon className="mr-2 h-4 w-4" />}
             Sign in with Google
           </Button>
 
@@ -190,7 +209,7 @@ export default function LoginPage() {
               <span className="w-full border-t" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
+              <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
             </div>
           </div>
 
@@ -209,7 +228,7 @@ export default function LoginPage() {
                       <FormItem>
                         <FormLabel>Email</FormLabel>
                         <FormControl>
-                          <Input type="email" placeholder="you@example.com" {...field} />
+                          <Input type="email" placeholder="you@example.com" {...field} required/>
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -222,14 +241,14 @@ export default function LoginPage() {
                       <FormItem>
                         <FormLabel>Password</FormLabel>
                         <FormControl>
-                          <Input type="password" placeholder="••••••••" {...field} />
+                          <Input type="password" placeholder="••••••••" {...field} required/>
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-                  <Button type="submit" className="w-full" disabled={loading || phoneLoading}>
-                    {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  <Button type="submit" className="w-full" disabled={emailLoading || phoneLoading || googleLoading}>
+                    {emailLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     Login with Email
                   </Button>
                 </form>
@@ -249,7 +268,7 @@ export default function LoginPage() {
                     <Input id="otp" type="text" placeholder="Enter OTP" value={otp} onChange={(e) => setOtp(e.target.value)} required />
                   </div>
                 )}
-                <Button type="submit" className="w-full" disabled={phoneLoading || loading}>
+                <Button type="submit" className="w-full" disabled={phoneLoading || emailLoading || googleLoading}>
                    {phoneLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   {otpSent ? 'Verify OTP' : 'Send OTP'}
                 </Button>
@@ -261,7 +280,7 @@ export default function LoginPage() {
         <CardFooter className="flex flex-col gap-4">
           <p className="text-sm text-muted-foreground">
             Don't have an account?{' '}
-            <Link href="/signup" className="text-primary hover:underline">
+            <Link href="/signup" className="text-primary hover:underline font-semibold">
               Sign up
             </Link>
           </p>
