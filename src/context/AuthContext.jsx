@@ -38,10 +38,18 @@ export const AuthProvider = ({ children }) => {
     });
 
     if (!res.ok) {
-      const errorData = await res.json();
+      let errorData;
+      const contentType = res.headers.get("content-type");
+      if (contentType && contentType.indexOf("application/json") !== -1) {
+        errorData = await res.json();
+      } else {
+        const textError = await res.text();
+        console.error("Signup failed with non-JSON response:", textError);
+        throw new Error('An unexpected server error occurred.');
+      }
       throw new Error(errorData.message || 'Signup failed');
     }
-    router.push('/login');
+    
     return res.json();
   };
 
