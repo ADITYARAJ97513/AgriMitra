@@ -11,7 +11,9 @@ import {
   ArrowRight,
   Users,
   Smartphone,
-  Brain
+  Brain,
+  ClipboardList,
+  BrainCircuit
 } from 'lucide-react';
 
 const features = [
@@ -73,13 +75,6 @@ const features = [
     }
 ];
 
-const stats = [
-    { number: '10,000+', label: 'Farmers Helped' },
-    { number: '50+', label: 'Crop Varieties' },
-    { number: '95%', label: 'Accuracy Rate' },
-    { number: '24/7', label: 'Support Available' }
-];
-
 export default function Home() {
     return (
         <div>
@@ -124,18 +119,51 @@ export default function Home() {
             </div>
           </section>
 
-          {/* Stats Section */}
-          <section className="py-16 bg-white">
+          {/* How It Works Section */}
+          <section className="py-20 bg-white">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-                {stats.map((stat, index) => (
-                  <div key={index} className="text-center">
-                    <div className="text-3xl md:text-4xl font-bold text-green-600 mb-2">
-                      {stat.number}
-                    </div>
-                    <div className="text-gray-600 font-medium">{stat.label}</div>
+              <div className="text-center mb-16">
+                <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                  Simple Steps to a Better Harvest
+                </h2>
+                <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                  Get expert farming advice in just a few clicks. Here’s how our AI helps you succeed.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-12 text-center">
+                {/* Step 1 */}
+                <div className="flex flex-col items-center">
+                  <div className="bg-green-100 text-green-600 p-4 rounded-full mb-4">
+                    <ClipboardList className="h-10 w-10" />
                   </div>
-                ))}
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">1. Share Your Details</h3>
+                  <p className="text-gray-600">
+                    Tell us about your farm—your location, soil type, and the crops you're considering. The more details you provide, the better the advice.
+                  </p>
+                </div>
+
+                {/* Step 2 */}
+                <div className="flex flex-col items-center">
+                  <div className="bg-blue-100 text-blue-600 p-4 rounded-full mb-4">
+                    <BrainCircuit className="h-10 w-10" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">2. Get AI Analysis</h3>
+                  <p className="text-gray-600">
+                    Our AI analyzes millions of data points, including local weather, market trends, and soil health, to generate tailored recommendations.
+                  </p>
+                </div>
+
+                {/* Step 3 */}
+                <div className="flex flex-col items-center">
+                  <div className="bg-orange-100 text-orange-600 p-4 rounded-full mb-4">
+                    <Sprout className="h-10 w-10" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">3. Farm with Confidence</h3>
+                  <p className="text-gray-600">
+                    Receive clear, actionable advice on fertilizers, pest control, and when to sell to maximize your yield and profits.
+                  </p>
+                </div>
               </div>
             </div>
           </section>
