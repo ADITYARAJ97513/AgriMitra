@@ -22,7 +22,7 @@ export default function CommunityPage() {
     if (!newQuestion.trim()) return;
     const newPost = {
       id: Date.now(),
-      author: user?.email?.split('@')[0] || 'Anonymous Farmer',
+      author: user?.username || 'Anonymous Farmer',
       question: newQuestion,
       timestamp: 'Just now',
       answers: [],
@@ -34,7 +34,7 @@ export default function CommunityPage() {
   const handleAddAnswer = (postId, answerText) => {
     const newAnswer = {
       id: Date.now(),
-      author: user?.email?.split('@')[0] || 'Anonymous Farmer',
+      author: user?.username || 'Anonymous Farmer',
       answer: answerText,
       timestamp: 'Just now',
       upvotes: 0,

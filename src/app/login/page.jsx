@@ -28,7 +28,7 @@ export default function LoginPage() {
 
   const form = useForm({
     defaultValues: {
-      email: '',
+      username: '',
       password: '',
     },
   });
@@ -36,7 +36,7 @@ export default function LoginPage() {
   const onSubmit = async (values) => {
     setIsSubmitting(true);
     try {
-      await login(values.email, values.password);
+      await login(values.username, values.password);
       toast({
         title: 'Login Successful',
         description: 'Welcome back!',
@@ -79,12 +79,12 @@ export default function LoginPage() {
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField
                 control={form.control}
-                name="email"
+                name="username"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email</FormLabel>
+                    <FormLabel>Username</FormLabel>
                     <FormControl>
-                      <Input type="email" placeholder="you@example.com" {...field} required/>
+                      <Input type="text" placeholder="yourusername" {...field} required/>
                     </FormControl>
                     <FormMessage />
                   </FormItem>

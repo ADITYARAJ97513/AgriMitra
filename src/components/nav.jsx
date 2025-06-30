@@ -74,7 +74,7 @@ export function Nav() {
                   <Skeleton className="h-8 w-24 rounded-md" />
                 ) : user ? (
                   <>
-                    <span className="text-sm text-muted-foreground hidden md:inline">{user.email}</span>
+                    <span className="text-sm text-muted-foreground hidden md:inline">{user.username}</span>
                     <Button variant="ghost" size="icon" onClick={handleLogout} title="Logout">
                       <LogOut className="h-5 w-5" />
                     </Button>
@@ -127,7 +127,7 @@ export function Nav() {
                     <div className="flex flex-col gap-2">
                         <div className="flex items-center gap-2 px-3 py-2">
                         <UserCircle className="h-5 w-5 text-muted-foreground" />
-                        <span className="text-base font-medium text-foreground/70 truncate">{user.email}</span>
+                        <span className="text-base font-medium text-foreground/70 truncate">{user.username}</span>
                         </div>
                         <Button variant="ghost" onClick={handleLogout} className="w-full justify-start text-base">
                         <LogOut className="mr-2 h-5 w-5" /> Logout

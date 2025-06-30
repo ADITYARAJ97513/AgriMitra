@@ -1,21 +1,21 @@
 
 import { NextResponse } from 'next/server';
-import { createUser, findUserByEmail } from '@/lib/user-store';
+import { createUser, findUserByUsername } from '@/lib/user-store';
 
 export async function POST(request) {
   try {
-    const { email, password } = await request.json();
+    const { username, password } = await request.json();
 
-    if (!email || !password || password.length < 6) {
-      return NextResponse.json({ message: 'Email and a password of at least 6 characters are required' }, { status: 400 });
+    if (!username || !password || password.length < 6) {
+      return NextResponse.json({ message: 'Username and a password of at least 6 characters are required' }, { status: 400 });
     }
 
-    const existingUser = await findUserByEmail(email);
+    const existingUser = await findUserByUsername(username);
     if (existingUser) {
-      return NextResponse.json({ message: 'User already exists' }, { status: 409 });
+      return NextResponse.json({ message: 'Username already exists' }, { status: 409 });
     }
 
-    await createUser({ email, password });
+    await createUser({ username, password });
 
     return NextResponse.json({ message: 'User created successfully' }, { status: 201 });
   } catch (error) {

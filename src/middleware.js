@@ -64,7 +64,7 @@ export async function middleware(request) {
         const decodedRefreshToken = await verifyToken(refreshToken, JWT_REFRESH_TOKEN_SECRET);
         if (decodedRefreshToken) {
             // Refresh token is valid, issue a new access token
-            const userPayload = { id: decodedRefreshToken.id, email: decodedRefreshToken.email };
+            const userPayload = { id: decodedRefreshToken.id, username: decodedRefreshToken.username };
             
             const newAccessToken = await new SignJWT(userPayload)
                 .setProtectedHeader({ alg: 'HS256' })

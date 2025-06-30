@@ -4,15 +4,15 @@ import bcrypt from 'bcryptjs';
 // In-memory store for users. In a real app, this would be a database.
 const users = [];
 
-export async function findUserByEmail(email) {
-  return users.find(user => user.email === email);
+export async function findUserByUsername(username) {
+  return users.find(user => user.username === username);
 }
 
-export async function createUser({ email, password }) {
+export async function createUser({ username, password }) {
   const hashedPassword = await bcrypt.hash(password, 10);
   const newUser = {
     id: Date.now().toString(),
-    email,
+    username,
     password: hashedPassword,
   };
   users.push(newUser);

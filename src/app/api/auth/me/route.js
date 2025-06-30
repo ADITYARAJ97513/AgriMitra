@@ -13,7 +13,7 @@ export async function GET(request) {
 
   try {
     const { payload } = await jwtVerify(accessToken, JWT_ACCESS_TOKEN_SECRET);
-    return NextResponse.json({ user: { id: payload.id, email: payload.email } }, { status: 200 });
+    return NextResponse.json({ user: { id: payload.id, username: payload.username } }, { status: 200 });
   } catch (error) {
     return NextResponse.json({ message: 'Unauthorized: Invalid token' }, { status: 401 });
   }

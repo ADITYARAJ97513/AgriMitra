@@ -28,7 +28,7 @@ export default function SignupPage() {
 
   const form = useForm({
     defaultValues: {
-      email: '',
+      username: '',
       password: '',
     },
   });
@@ -36,12 +36,11 @@ export default function SignupPage() {
   const onSubmit = async (values) => {
     setIsSubmitting(true);
     try {
-      await signup(values.email, values.password);
+      await signup(values.username, values.password);
       toast({
         title: 'Signup Successful',
         description: 'Your account has been created. Please log in.',
       });
-      router.push('/login');
     } catch (error) {
       toast({
         variant: 'destructive',
@@ -79,12 +78,12 @@ export default function SignupPage() {
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <FormField
                     control={form.control}
-                    name="email"
+                    name="username"
                     render={({ field }) => (
                     <FormItem>
-                        <FormLabel>Email</FormLabel>
+                        <FormLabel>Username</FormLabel>
                         <FormControl>
-                        <Input type="email" placeholder="you@example.com" {...field} required/>
+                        <Input type="text" placeholder="choose a unique username" {...field} required/>
                         </FormControl>
                         <FormMessage />
                     </FormItem>

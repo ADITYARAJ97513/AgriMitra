@@ -1,6 +1,6 @@
 
 import { NextResponse } from 'next/server';
-import { findUserByEmail, verifyPassword } from '@/lib/user-store';
+import { findUserByUsername, verifyPassword } from '@/lib/user-store';
 import { SignJWT } from 'jose';
 import { serialize } from 'cookie';
 
@@ -11,13 +11,13 @@ const JWT_REFRESH_TOKEN_EXPIRES_IN = process.env.JWT_REFRESH_TOKEN_EXPIRES_IN ||
 
 export async function POST(request) {
   try {
-    const { email, password } = await request.json();
+    const { username, password } = await request.json();
 
-    if (!email || !password) {
-      return NextResponse.json({ message: 'Email and password are required' }, { status: 400 });
+    if (!username || !password) {
+      return NextResponse.json({ message: 'Username and password are required' }, { status: 400 });
     }
 
-    const user = await findUserByEmail(email);
+    const user = await findUserByUsername(username);
     if (!user) {
       return NextResponse.json({ message: 'Invalid credentials' }, { status: 401 });
     }
@@ -27,7 +27,7 @@ export async function POST(request) {
       return NextResponse.json({ message: 'Invalid credentials' }, { status: 401 });
     }
 
-    const userPayload = { id: user.id, email: user.email };
+    const userPayload = { id: user.id, username: user.username };
 
     const accessToken = await new SignJWT(userPayload)
         .setProtectedHeader({ alg: 'HS256' })
