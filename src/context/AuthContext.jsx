@@ -50,7 +50,9 @@ export const AuthProvider = ({ children }) => {
       throw new Error(errorData.message || 'Signup failed');
     }
     
-    return res.json();
+    // After successful signup, we don't automatically log them in.
+    // The user will be redirected to the login page from the signup component.
+    setUser(null);
   };
 
   const login = async (username, password) => {
@@ -82,7 +84,7 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider value={{ user, loading, signup, login, logout }}>
-      {!loading && children}
+      {children}
     </AuthContext.Provider>
   );
 };
