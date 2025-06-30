@@ -12,51 +12,22 @@ export async function marketAndYieldForecast(input) {
   return marketAndYieldForecastFlow(input);
 }
 
-const prompt = ai.definePrompt({
-  name: 'marketAndYieldForecastPrompt',
-  prompt: `You are an AI Agritech Expert helping farmers in India with market analysis, in simple Hinglish.
-
-  Based on the following inputs, generate:
-  * Estimated yield
-  * Market advice (including demand and pricing trends for the harvest month)
-  * A simple profit analysis (if input costs are provided)
-
-  Input Details:
-  - Crop: {{{cropName}}}
-  - Variety: {{{cropVariety}}}
-  - Land Size: {{{landSize}}}
-  - Location (District/State): {{{location}}}
-  - Farming Method: {{{farmingMethod}}}
-  - Expected Harvest Month: {{{expectedHarvestMonth}}}
-  - Input Costs: {{{inputCosts}}}
-  - Preferred Mandi: {{{mandiPreference}}}
-
-  Your answer must:
-  * Be in simple Hindi-English (Hinglish).
-  * Provide practical, actionable advice.
-  * Use real-time or near real-time data for market prices if possible, mentioning the source or that it's an estimate.
-  * End with a friendly motivational line.
-
-  The output should be a single, valid JSON object with 'yieldEstimation', 'marketAdvice', and optional 'profitAnalysis' keys. Do not include any other text or markdown formatting.`,
-});
-
 const marketAndYieldForecastFlow = ai.defineFlow(
   {
     name: 'marketAndYieldForecastFlow',
   },
-  async input => {
-    const { text } = await prompt(input);
-    if (!text) {
-      throw new Error("AI returned no response.");
+  async (input) => {
+    // Return mock data instead of calling the AI
+    const mockResponse = {
+      yieldEstimation:
+        `For ${input.cropName || 'your crop'} (${input.cropVariety || 'local variety'}) on ${input.landSize} acres using ${input.farmingMethod} methods, you can expect an estimated yield of around 18-22 quintals.`,
+      marketAdvice:
+        `In ${input.expectedHarvestMonth || 'the upcoming month'}, prices for ${input.cropName || 'your crop'} at the ${input.mandiPreference || 'local'} mandi are expected to be stable. Look for a price around Rs. 2100-2250 per quintal.`,
+      profitAnalysis: '',
+    };
+    if (input.inputCosts) {
+      mockResponse.profitAnalysis = `With input costs of Rs. ${input.inputCosts}, you could see a potential profit of Rs. 20,000 - 25,000. This is an estimate and depends on final market price and yield.`;
     }
-    try {
-      return JSON.parse(text);
-    } catch (e) {
-      const jsonMatch = text.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        return JSON.parse(jsonMatch[0]);
-      }
-      throw new Error("Failed to parse AI response.");
-    }
+    return mockResponse;
   }
 );

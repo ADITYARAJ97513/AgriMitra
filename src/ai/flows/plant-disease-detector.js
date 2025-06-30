@@ -11,49 +11,29 @@ export async function detectPlantDisease(input) {
   return detectPlantDiseaseFlow(input);
 }
 
-const prompt = ai.definePrompt({
-  name: 'detectPlantDiseasePrompt',
-  prompt: `You are an expert plant pathologist. Your task is to identify diseases in plants from images of their leaves, focusing on tomato, paddy, and wheat.
-
-You will be given a photo of a plant leaf and additional context to improve your diagnosis.
-
-Analyze the image and context, then provide the following information:
-1.  **isPlant**: Confirm if the image is of a plant leaf.
-2.  **disease**: Identify the specific disease affecting the plant. If the plant appears healthy, state "Healthy".
-3.  **description**: Provide a brief description of the disease, its symptoms, and causes.
-4.  **solution**: Suggest practical and effective solutions for treating the disease, including both organic and chemical options if applicable.
-
-If the image is not a plant leaf, set isPlant to false and leave other fields empty.
-
-Context:
-- Crop Type: {{{cropType}}}
-- Growth Stage: {{{growthStage}}}
-- Location: {{{location}}}
-- Observed Symptoms: {{{symptomsObserved}}}
-
-Photo: {{media url=photoDataUri}}
-
-Provide your response as a single, valid JSON object with the keys: "isPlant", "disease", "description", and "solution". Do not include any other text or markdown formatting.
-`,
-});
-
 const detectPlantDiseaseFlow = ai.defineFlow(
   {
     name: 'detectPlantDiseaseFlow',
   },
-  async input => {
-    const { text } = await prompt(input);
-    if (!text) {
-      throw new Error("AI returned no response.");
+  async (input) => {
+    // Return mock data instead of calling the AI
+    // Wait for a bit to simulate processing
+    await new Promise(resolve => setTimeout(resolve, 1500));
+
+    if (input.cropType && input.cropType.toLowerCase() === 'tomato') {
+        return {
+            isPlant: true,
+            disease: 'Tomato Early Blight',
+            description: 'Early blight is a fungal disease characterized by brown to black spots with concentric rings, resembling a target. It typically starts on lower, older leaves.',
+            solution: 'Remove and discard affected lower leaves. Ensure good air circulation by spacing plants properly. For organic treatment, use a copper-based fungicide. For chemical treatment, Mancozeb can be effective. Avoid overhead watering.'
+        }
     }
-     try {
-      return JSON.parse(text);
-    } catch (e) {
-      const jsonMatch = text.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        return JSON.parse(jsonMatch[0]);
-      }
-      throw new Error("Failed to parse AI response.");
-    }
+    
+    return {
+      isPlant: true,
+      disease: 'Healthy',
+      description: 'The plant appears to be healthy. No signs of major diseases detected. The leaves have good color and structure.',
+      solution: 'Continue with good agricultural practices. Ensure proper nutrition and watering to maintain plant health. Regularly monitor for any signs of pests or diseases.'
+    };
   }
 );
