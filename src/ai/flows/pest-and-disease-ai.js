@@ -31,7 +31,6 @@ export async function pestAndDiseaseAI(input) {
 
 const pestAndDiseasePrompt = ai.definePrompt({
   name: 'pestAndDiseasePrompt',
-  model: 'googleai/gemini-1.5-flash-latest',
   input: { schema: PestAndDiseaseAIInputSchema },
   output: { schema: PestAndDiseaseAIOutputSchema },
   prompt: `You are an expert plant pathologist for Indian agriculture. Analyze the farmer's situation and provide pest and disease control advice.
@@ -60,7 +59,11 @@ const pestAndDiseaseFlow = ai.defineFlow(
     outputSchema: PestAndDiseaseAIOutputSchema,
   },
   async (input) => {
-    const { output } = await pestAndDiseasePrompt(input);
+    const { output } = await ai.generate({
+      prompt: pestAndDiseasePrompt,
+      model: 'googleai/gemini-1.5-flash-latest',
+      input: input,
+    });
     return output;
   }
 );

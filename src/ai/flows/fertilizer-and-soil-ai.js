@@ -32,7 +32,6 @@ export async function getFertilizerAndSoilAdvice(input) {
 
 const fertilizerAndSoilAdvicePrompt = ai.definePrompt({
   name: 'fertilizerAndSoilAdvicePrompt',
-  model: 'googleai/gemini-1.5-flash-latest',
   input: { schema: FertilizerAndSoilAdviceInputSchema },
   output: { schema: FertilizerAndSoilAdviceOutputSchema },
   prompt: `You are an expert soil scientist and agronomist advising an Indian farmer. Provide fertilizer and soil health recommendations based on the details below.
@@ -66,7 +65,11 @@ const fertilizerAndSoilAdviceFlow = ai.defineFlow(
     outputSchema: FertilizerAndSoilAdviceOutputSchema,
   },
   async (input) => {
-    const { output } = await fertilizerAndSoilAdvicePrompt(input);
+    const { output } = await ai.generate({
+      prompt: fertilizerAndSoilAdvicePrompt,
+      model: 'googleai/gemini-1.5-flash-latest',
+      input: input,
+    });
     return output;
   }
 );

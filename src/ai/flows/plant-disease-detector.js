@@ -29,7 +29,6 @@ export async function detectPlantDisease(input) {
 
 const detectPlantDiseasePrompt = ai.definePrompt({
   name: 'detectPlantDiseasePrompt',
-  model: 'googleai/gemini-1.5-flash-latest',
   input: { schema: DetectPlantDiseaseInputSchema },
   output: { schema: DetectPlantDiseaseOutputSchema },
   prompt: `You are a plant disease detection expert. Analyze the provided image and information to diagnose the plant's health.
@@ -62,7 +61,11 @@ const detectPlantDiseaseFlow = ai.defineFlow(
     outputSchema: DetectPlantDiseaseOutputSchema,
   },
   async (input) => {
-    const { output } = await detectPlantDiseasePrompt(input);
+    const { output } = await ai.generate({
+      prompt: detectPlantDiseasePrompt,
+      model: 'googleai/gemini-1.5-flash-latest',
+      input: input,
+    });
     return output;
   }
 );

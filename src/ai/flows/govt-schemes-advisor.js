@@ -32,7 +32,6 @@ export async function getGovtSchemes(input) {
 
 const govtSchemesAdvisorPrompt = ai.definePrompt({
   name: 'govtSchemesAdvisorPrompt',
-  model: 'googleai/gemini-1.5-flash-latest',
   input: { schema: GetGovtSchemesInputSchema },
   output: { schema: GetGovtSchemesOutputSchema },
   prompt: `You are an advisor specializing in Indian government agricultural schemes. Based on the farmer's profile below, identify and detail 2-3 of the most relevant central or state-specific schemes.
@@ -62,7 +61,11 @@ const govtSchemesAdvisorFlow = ai.defineFlow(
     outputSchema: GetGovtSchemesOutputSchema,
   },
   async (input) => {
-    const { output } = await govtSchemesAdvisorPrompt(input);
+    const { output } = await ai.generate({
+      prompt: govtSchemesAdvisorPrompt,
+      model: 'googleai/gemini-1.5-flash-latest',
+      input: input,
+    });
     return output;
   }
 );
