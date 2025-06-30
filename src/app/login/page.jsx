@@ -46,6 +46,8 @@ const getAuthErrorMessage = (error) => {
             return 'Invalid OTP. Please try again.';
         case 'auth/configuration-not-found':
             return 'Phone sign-in is not enabled for this project. Please enable it in the Firebase console under Authentication > Sign-in method.';
+        case 'auth/billing-not-enabled':
+            return 'Phone sign-in requires billing to be enabled for your project. Please upgrade to the Blaze plan in the Firebase console to use this feature.';
         default:
             return error.message || 'An unexpected error occurred. Please try again.';
     }
