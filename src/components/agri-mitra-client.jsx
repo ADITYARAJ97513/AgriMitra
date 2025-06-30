@@ -38,11 +38,11 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
-import { recommendCrops, type RecommendCropsOutput } from "@/ai/flows/intelligent-crop-advisor";
-import { getFertilizerAndSoilAdvice, type FertilizerAndSoilAdviceOutput } from "@/ai/flows/fertilizer-and-soil-ai";
-import { pestAndDiseaseAI, type PestAndDiseaseOutput } from "@/ai/flows/pest-and-disease-ai";
-import { getWeatherAlerts, type WeatherAlertsOutput } from "@/ai/flows/weather-watch-ai";
-import { marketAndYieldForecast, type MarketAndYieldForecastOutput } from "@/ai/flows/market-and-yield-forecaster";
+import { recommendCrops } from "@/ai/flows/intelligent-crop-advisor";
+import { getFertilizerAndSoilAdvice } from "@/ai/flows/fertilizer-and-soil-ai";
+import { pestAndDiseaseAI } from "@/ai/flows/pest-and-disease-ai";
+import { getWeatherAlerts } from "@/ai/flows/weather-watch-ai";
+import { marketAndYieldForecast } from "@/ai/flows/market-and-yield-forecaster";
 import { Sprout, Leaf, FlaskConical, Bug, Cloudy, AreaChart, AlertTriangle, Lightbulb, Tractor, TrendingUp } from "lucide-react";
 import React, { useState, useEffect, useCallback } from "react";
 
@@ -55,29 +55,21 @@ const formSchema = z.object({
   budget: z.enum(["Low", "Medium", "High"], { required_error: "Please select a budget." }),
 });
 
-type FormValues = z.infer<typeof formSchema>;
-
 export default function AgriMitraClient() {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [loadingSecondary, setLoadingSecondary] = useState(false);
-  const [results, setResults] = useState<{
-    cropAdvice: RecommendCropsOutput | null;
-    fertilizerAdvice: FertilizerAndSoilAdviceOutput | null;
-    pestAdvice: PestAndDiseaseOutput | null;
-    weatherAlerts: WeatherAlertsOutput | null;
-    marketForecast: MarketAndYieldForecastOutput | null;
-  }>({
+  const [results, setResults] = useState({
     cropAdvice: null,
     fertilizerAdvice: null,
     pestAdvice: null,
     weatherAlerts: null,
     marketForecast: null,
   });
-  const [selectedCrop, setSelectedCrop] = useState<string | null>(null);
-  const [formValues, setFormValues] = useState<FormValues | null>(null);
+  const [selectedCrop, setSelectedCrop] = useState(null);
+  const [formValues, setFormValues] = useState(null);
 
-  const form = useForm<FormValues>({
+  const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
       state: "",
@@ -85,7 +77,7 @@ export default function AgriMitraClient() {
     },
   });
 
-  const onSubmit = async (values: FormValues) => {
+  const onSubmit = async (values) => {
     setLoading(true);
     setResults({ cropAdvice: null, fertilizerAdvice: null, pestAdvice: null, weatherAlerts: null, marketForecast: null });
     setSelectedCrop(null);
@@ -109,7 +101,7 @@ export default function AgriMitraClient() {
     }
   };
   
-  const fetchSecondaryAdvice = useCallback(async (crop: string, values: FormValues) => {
+  const fetchSecondaryAdvice = useCallback(async (crop, values) => {
     setLoadingSecondary(true);
     setResults(prev => ({ ...prev, pestAdvice: null, weatherAlerts: null, marketForecast: null }));
     try {
@@ -143,7 +135,7 @@ export default function AgriMitraClient() {
     }
   }, [selectedCrop, formValues, fetchSecondaryAdvice]);
   
-  const renderList = (items: string[], icon: React.ElementType) => {
+  const renderList = (items, icon) => {
     const Icon = icon;
     return (
       <ul className="space-y-3">
