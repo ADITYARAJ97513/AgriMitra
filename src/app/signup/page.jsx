@@ -20,6 +20,30 @@ const GoogleIcon = (props) => (
     </svg>
 );
 
+const getAuthErrorMessage = (error) => {
+    switch (error.code) {
+        case 'auth/invalid-api-key':
+        case 'auth/api-key-not-valid':
+            return 'Firebase configuration is invalid. Please ensure you have set a valid API key in your .env file.';
+        case 'auth/wrong-password':
+            return 'Incorrect password. Please try again.';
+        case 'auth/user-not-found':
+            return 'No account found with this email. Please sign up first.';
+        case 'auth/email-already-in-use':
+            return 'This email is already in use. Please log in or use a different email.';
+        case 'auth/weak-password':
+            return 'The password is too weak. Please choose a stronger password.';
+        case 'auth/invalid-phone-number':
+            return 'Invalid phone number format. Please include the country code (e.g., +91).';
+        case 'auth/too-many-requests':
+            return 'Too many requests from this device. Please try again later.';
+        case 'auth/invalid-verification-code':
+            return 'Invalid OTP. Please try again.';
+        default:
+            return error.message || 'An unexpected error occurred. Please try again.';
+    }
+};
+
 export default function SignupPage() {
   const { signup, loginWithGoogle, firebaseEnabled } = useAuth();
   const router = useRouter();
@@ -46,7 +70,7 @@ export default function SignupPage() {
       toast({
         variant: 'destructive',
         title: 'Signup Failed',
-        description: error.message,
+        description: getAuthErrorMessage(error),
       });
       console.error(error);
     } finally {
@@ -67,7 +91,7 @@ export default function SignupPage() {
           toast({
               variant: 'destructive',
               title: 'Signup Failed',
-              description: error.message,
+              description: getAuthErrorMessage(error),
           });
           console.error(error);
       } finally {

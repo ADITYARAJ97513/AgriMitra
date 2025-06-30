@@ -25,6 +25,30 @@ const GoogleIcon = (props) => (
     </svg>
 );
 
+const getAuthErrorMessage = (error) => {
+    switch (error.code) {
+        case 'auth/invalid-api-key':
+        case 'auth/api-key-not-valid':
+            return 'Firebase configuration is invalid. Please ensure you have set a valid API key in your .env file.';
+        case 'auth/wrong-password':
+            return 'Incorrect password. Please try again.';
+        case 'auth/user-not-found':
+            return 'No account found with this email. Please sign up first.';
+        case 'auth/email-already-in-use':
+            return 'This email is already in use. Please log in or use a different email.';
+        case 'auth/weak-password':
+            return 'The password is too weak. Please choose a stronger password.';
+        case 'auth/invalid-phone-number':
+            return 'Invalid phone number format. Please include the country code (e.g., +91).';
+        case 'auth/too-many-requests':
+            return 'Too many requests from this device. Please try again later.';
+        case 'auth/invalid-verification-code':
+            return 'Invalid OTP. Please try again.';
+        default:
+            return error.message || 'An unexpected error occurred. Please try again.';
+    }
+};
+
 
 export default function LoginPage() {
   const { login, loginWithGoogle, firebaseEnabled } = useAuth();
@@ -61,16 +85,16 @@ export default function LoginPage() {
   const handleSendOtp = async (e) => {
     e.preventDefault();
     setPhoneLoading(true);
-    generateRecaptcha();
-    const appVerifier = window.recaptchaVerifier;
     try {
+        generateRecaptcha();
+        const appVerifier = window.recaptchaVerifier;
         const result = await signInWithPhoneNumber(auth, phone, appVerifier);
         setConfirmationResult(result);
         setOtpSent(true);
         toast({ title: 'OTP Sent!', description: 'Please check your phone for the one-time password.' });
     } catch (error) {
         console.error("Phone Auth Error:", error);
-        toast({ variant: 'destructive', title: 'Error', description: 'Failed to send OTP. Please check the phone number and try again.' });
+        toast({ variant: 'destructive', title: 'Authentication Error', description: getAuthErrorMessage(error) });
     } finally {
         setPhoneLoading(false);
     }
@@ -86,7 +110,7 @@ export default function LoginPage() {
         router.push('/');
     } catch (error) {
          console.error("OTP Verify Error:", error);
-         toast({ variant: 'destructive', title: 'Login Failed', description: 'Invalid OTP. Please try again.' });
+         toast({ variant: 'destructive', title: 'Login Failed', description: getAuthErrorMessage(error) });
     } finally {
         setPhoneLoading(false);
     }
@@ -105,7 +129,7 @@ export default function LoginPage() {
           toast({
               variant: 'destructive',
               title: 'Login Failed',
-              description: error.message,
+              description: getAuthErrorMessage(error),
           });
           console.error(error);
       } finally {
@@ -126,7 +150,7 @@ export default function LoginPage() {
       toast({
         variant: 'destructive',
         title: 'Login Failed',
-        description: error.message,
+        description: getAuthErrorMessage(error),
       });
       console.error(error);
     } finally {
