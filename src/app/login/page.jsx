@@ -12,11 +12,6 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Terminal, Loader2 } from 'lucide-react';
-import { Separator } from '@/components/ui/separator';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { RecaptchaVerifier, signInWithPhoneNumber } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
-import { Label } from '@/components/ui/label';
 
 const GoogleIcon = (props) => (
     <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" {...props}>
@@ -38,16 +33,8 @@ const getAuthErrorMessage = (error) => {
             return 'This email is already in use. Please log in or use a different email.';
         case 'auth/weak-password':
             return 'The password is too weak. Please choose a stronger password.';
-        case 'auth/invalid-phone-number':
-            return 'Invalid phone number format. Please check the number and try again.';
         case 'auth/too-many-requests':
             return 'Too many requests from this device. Please try again later.';
-        case 'auth/invalid-verification-code':
-            return 'Invalid OTP. Please try again.';
-        case 'auth/configuration-not-found':
-            return 'Phone sign-in is not enabled for this project. Please enable it in the Firebase console under Authentication > Sign-in method.';
-        case 'auth/billing-not-enabled':
-            return 'Phone sign-in requires billing to be enabled for your project. Please upgrade to the Blaze plan in the Firebase console to use this feature.';
         default:
             return error.message || 'An unexpected error occurred. Please try again.';
     }
@@ -58,16 +45,8 @@ export default function LoginPage() {
   const { user, loading, login, loginWithGoogle, firebaseEnabled } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
-  const [phoneLoading, setPhoneLoading] = useState(false);
   const [emailLoading, setEmailLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
-
-  // Phone auth state
-  const [countryCode, setCountryCode] = useState('91');
-  const [phoneNumber, setPhoneNumber] = useState('');
-  const [otp, setOtp] = useState('');
-  const [confirmationResult, setConfirmationResult] = useState(null);
-  const [otpSent, setOtpSent] = useState(false);
   
   useEffect(() => {
     if (!loading && user) {
@@ -81,52 +60,6 @@ export default function LoginPage() {
       password: '',
     },
   });
-
-  const generateRecaptcha = () => {
-    if (!window.recaptchaVerifier) {
-      window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-        'size': 'invisible',
-        'callback': (response) => {
-          // reCAPTCHA solved, allow signInWithPhoneNumber.
-        }
-      });
-    }
-  }
-
-  const handleSendOtp = async (e) => {
-    e.preventDefault();
-    setPhoneLoading(true);
-    const fullPhoneNumber = `+${countryCode}${phoneNumber}`;
-    try {
-        generateRecaptcha();
-        const appVerifier = window.recaptchaVerifier;
-        const result = await signInWithPhoneNumber(auth, fullPhoneNumber, appVerifier);
-        setConfirmationResult(result);
-        setOtpSent(true);
-        toast({ title: 'OTP Sent!', description: 'Please check your phone for the one-time password.' });
-    } catch (error) {
-        console.error("Phone Auth Error:", error);
-        toast({ variant: 'destructive', title: 'Authentication Error', description: getAuthErrorMessage(error) });
-    } finally {
-        setPhoneLoading(false);
-    }
-  };
-
-  const handleVerifyOtp = async (e) => {
-    e.preventDefault();
-    if (otp.length !== 6) return;
-    setPhoneLoading(true);
-    try {
-        await confirmationResult.confirm(otp);
-        toast({ title: 'Login Successful', description: 'Welcome back!' });
-        router.push('/');
-    } catch (error) {
-         console.error("OTP Verify Error:", error);
-         toast({ variant: 'destructive', title: 'Login Failed', description: getAuthErrorMessage(error) });
-    } finally {
-        setPhoneLoading(false);
-    }
-  };
 
   const handleGoogleLogin = async () => {
       setGoogleLoading(true);
@@ -205,7 +138,7 @@ export default function LoginPage() {
           <CardDescription>Choose a method to access your account.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <Button variant="outline" className="w-full" onClick={handleGoogleLogin} disabled={emailLoading || phoneLoading || googleLoading}>
+          <Button variant="outline" className="w-full" onClick={handleGoogleLogin} disabled={emailLoading || googleLoading}>
             {googleLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <GoogleIcon className="mr-2 h-4 w-4" />}
             Sign in with Google
           </Button>
@@ -219,91 +152,40 @@ export default function LoginPage() {
             </div>
           </div>
 
-          <Tabs defaultValue="email" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="email">Email</TabsTrigger>
-              <TabsTrigger value="phone">Phone</TabsTrigger>
-            </TabsList>
-            <TabsContent value="email">
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onEmailSubmit)} className="space-y-4 pt-4">
-                  <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Email</FormLabel>
-                        <FormControl>
-                          <Input type="email" placeholder="you@example.com" {...field} required/>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="password"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Password</FormLabel>
-                        <FormControl>
-                          <Input type="password" placeholder="••••••••" {...field} required/>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <Button type="submit" className="w-full" disabled={emailLoading || phoneLoading || googleLoading}>
-                    {emailLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Login with Email
-                  </Button>
-                </form>
-              </Form>
-            </TabsContent>
-            <TabsContent value="phone">
-               <form onSubmit={otpSent ? handleVerifyOtp : handleSendOtp} className="space-y-4 pt-4">
-                {!otpSent ? (
-                  <div className="space-y-2">
-                    <Label htmlFor="phone">Phone Number</Label>
-                    <div className="flex gap-2">
-                      <div className="relative w-20">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">+</span>
-                        <Input 
-                          id="country-code" 
-                          type="text" 
-                          placeholder="91" 
-                          value={countryCode} 
-                          onChange={(e) => setCountryCode(e.target.value)} 
-                          required 
-                          className="pl-6"
-                        />
-                      </div>
-                      <Input 
-                        id="phone" 
-                        type="tel" 
-                        placeholder="12345 67890" 
-                        value={phoneNumber} 
-                        onChange={(e) => setPhoneNumber(e.target.value)} 
-                        required 
-                        className="flex-1"
-                      />
-                    </div>
-                    <p className="text-sm text-muted-foreground">Enter country code and phone number separately.</p>
-                  </div>
-                ) : (
-                  <div className="space-y-2">
-                    <Label htmlFor="otp">One-Time Password</Label>
-                    <Input id="otp" type="text" placeholder="Enter OTP" value={otp} onChange={(e) => setOtp(e.target.value)} required />
-                  </div>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onEmailSubmit)} className="space-y-4 pt-4">
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <Input type="email" placeholder="you@example.com" {...field} required/>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
                 )}
-                <Button type="submit" className="w-full" disabled={phoneLoading || emailLoading || googleLoading}>
-                   {phoneLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  {otpSent ? 'Verify OTP' : 'Send OTP'}
-                </Button>
-              </form>
-            </TabsContent>
-          </Tabs>
-          <div id="recaptcha-container"></div>
+              />
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Password</FormLabel>
+                    <FormControl>
+                      <Input type="password" placeholder="••••••••" {...field} required/>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button type="submit" className="w-full" disabled={emailLoading || googleLoading}>
+                {emailLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Login with Email
+              </Button>
+            </form>
+          </Form>
         </CardContent>
         <CardFooter className="flex flex-col gap-4">
           <p className="text-sm text-muted-foreground">
