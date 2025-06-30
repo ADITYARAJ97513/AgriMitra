@@ -2,7 +2,11 @@
 import bcrypt from 'bcryptjs';
 
 // In-memory store for users. In a real app, this would be a database.
-const users = [];
+// To prevent the store from being cleared on hot-reloads in development,
+// we attach it to the global object. This is a common pattern.
+const globalForUsers = globalThis;
+const users = globalForUsers.users || (globalForUsers.users = []);
+
 
 export async function findUserByUsername(username) {
   return users.find(user => user.username === username);
