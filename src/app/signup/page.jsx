@@ -37,13 +37,17 @@ const getAuthErrorMessage = (error) => {
             return 'Too many requests from this device. Please try again later.';
         case 'auth/unauthorized-domain':
             return 'This domain is not authorized for authentication. Please add it to the list of authorized domains in your Firebase project settings.';
+        case 'auth/configuration-not-found':
+            return 'Phone number authentication is not enabled in your Firebase project. Please enable it in the Firebase Console.';
+        case 'auth/billing-not-enabled':
+            return 'Billing is not enabled for your Firebase project. Phone authentication requires the Blaze (pay-as-you-go) plan.';
         default:
             return error.message || 'An unexpected error occurred. Please try again.';
     }
 };
 
 export default function SignupPage() {
-  const { user, loading, signup, loginWithGoogle, firebaseEnabled } = useAuth();
+  const { user, loading, signup, loginWithGoogle, firebaseEnabled, logout } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
   const [emailLoading, setEmailLoading] = useState(false);
@@ -66,11 +70,12 @@ export default function SignupPage() {
     setEmailLoading(true);
     try {
       await signup(values.email, values.password);
+      await logout();
       toast({
         title: 'Signup Successful',
-        description: 'Your account has been created.',
+        description: 'Your account has been created. Please log in.',
       });
-      router.push('/');
+      router.push('/login');
     } catch (error) {
       toast({
         variant: 'destructive',
@@ -87,11 +92,12 @@ export default function SignupPage() {
       setGoogleLoading(true);
       try {
           await loginWithGoogle();
+          await logout();
           toast({
               title: 'Signup Successful',
-              description: 'Your account has been created.',
+              description: 'Your account has been created. Please log in.',
           });
-          router.push('/');
+          router.push('/login');
       } catch (error) {
           toast({
               variant: 'destructive',
