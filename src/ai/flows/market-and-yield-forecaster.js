@@ -31,6 +31,7 @@ export async function marketAndYieldForecast(input) {
 
 const marketAndYieldForecastPrompt = ai.definePrompt({
   name: 'marketAndYieldForecastPrompt',
+  model: 'googleai/gemini-1.5-flash-latest',
   input: { schema: MarketAndYieldForecastInputSchema },
   output: { schema: MarketAndYieldForecastOutputSchema },
   prompt: `You are an expert agricultural market analyst for India. Provide a yield and market forecast based on the following information.

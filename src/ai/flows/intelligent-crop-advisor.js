@@ -34,6 +34,7 @@ export async function recommendCrops(input) {
 
 const recommendCropsPrompt = ai.definePrompt({
   name: 'recommendCropsPrompt',
+  model: 'googleai/gemini-1.5-flash-latest',
   input: { schema: RecommendCropsInputSchema },
   output: { schema: RecommendCropsOutputSchema },
   prompt: `You are an expert agricultural advisor for Indian farmers. Based on the following details, provide a detailed crop recommendation.
