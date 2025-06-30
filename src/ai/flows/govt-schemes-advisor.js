@@ -62,10 +62,7 @@ const govtSchemesAdvisorFlow = ai.defineFlow(
     outputSchema: GetGovtSchemesOutputSchema,
   },
   async (input) => {
-    const { output } = await ai.generate({
-      prompt: govtSchemesAdvisorPrompt,
-      input: input,
-    });
+    const { output } = await govtSchemesAdvisorPrompt(input);
     return output;
   }
 );

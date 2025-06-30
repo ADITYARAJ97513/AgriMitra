@@ -61,10 +61,7 @@ const marketAndYieldForecastFlow = ai.defineFlow(
     outputSchema: MarketAndYieldForecastOutputSchema,
   },
   async (input) => {
-    const { output } = await ai.generate({
-      prompt: marketAndYieldForecastPrompt,
-      input: input,
-    });
+    const { output } = await marketAndYieldForecastPrompt(input);
     return output;
   }
 );

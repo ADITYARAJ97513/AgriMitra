@@ -62,10 +62,7 @@ const detectPlantDiseaseFlow = ai.defineFlow(
     outputSchema: DetectPlantDiseaseOutputSchema,
   },
   async (input) => {
-    const { output } = await ai.generate({
-      prompt: detectPlantDiseasePrompt,
-      input: input,
-    });
+    const { output } = await detectPlantDiseasePrompt(input);
     return output;
   }
 );

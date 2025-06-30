@@ -66,10 +66,7 @@ const fertilizerAndSoilAdviceFlow = ai.defineFlow(
     outputSchema: FertilizerAndSoilAdviceOutputSchema,
   },
   async (input) => {
-    const { output } = await ai.generate({
-      prompt: fertilizerAndSoilAdvicePrompt,
-      input: input,
-    });
+    const { output } = await fertilizerAndSoilAdvicePrompt(input);
     return output;
   }
 );

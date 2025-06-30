@@ -60,10 +60,7 @@ const pestAndDiseaseFlow = ai.defineFlow(
     outputSchema: PestAndDiseaseAIOutputSchema,
   },
   async (input) => {
-    const { output } = await ai.generate({
-      prompt: pestAndDiseasePrompt,
-      input: input,
-    });
+    const { output } = await pestAndDiseasePrompt(input);
     return output;
   }
 );

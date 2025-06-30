@@ -64,10 +64,7 @@ const recommendCropsFlow = ai.defineFlow(
     outputSchema: RecommendCropsOutputSchema,
   },
   async (input) => {
-    const { output } = await ai.generate({
-      prompt: recommendCropsPrompt,
-      input: input,
-    });
+    const { output } = await recommendCropsPrompt(input);
     return output;
   }
 );
