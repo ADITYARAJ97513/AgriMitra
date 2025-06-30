@@ -30,6 +30,33 @@ export async function getFertilizerAndSoilAdvice(input) {
   return fertilizerAndSoilAdviceFlow(input);
 }
 
+const fertilizerAndSoilAdvicePrompt = ai.definePrompt({
+    name: 'fertilizerAndSoilAdvicePrompt',
+    model: 'googleai/gemini-1.5-flash-latest',
+    input: { schema: FertilizerAndSoilAdviceInputSchema },
+    output: { schema: FertilizerAndSoilAdviceOutputSchema },
+    prompt: `You are an Indian soil science and fertilizer expert. A farmer needs advice based on the following information. Provide practical, actionable suggestions.
+
+    Farming Context:
+    - Crop: {{{cropSelected}}}
+    - Soil Type: {{{soilType}}}
+    - Land Size: {{{landSize}}} acres
+    - Prefers Organic: {{{organicPreference}}}
+    {{#if recentFertilizerUsed}}- Recently Used: {{{recentFertilizerUsed}}}{{/if}}
+    
+    Soil Test Data:
+    - Available: {{{soilTestAvailable}}}
+    {{#if nitrogenLevel}}- Nitrogen (N): {{{nitrogenLevel}}} kg/ha{{/if}}
+    {{#if phosphorusLevel}}- Phosphorus (P): {{{phosphorusLevel}}} kg/ha{{/if}}
+    {{#if potassiumLevel}}- Potassium (K): {{{potassiumLevel}}} kg/ha{{/if}}
+    {{#if pH}}- pH: {{{pH}}}{{/if}}
+
+    Your tasks:
+    1.  Provide a list of 2-3 specific fertilizer suggestions. If the farmer prefers organic, prioritize organic options like compost, vermicompost, or bio-fertilizers. If not, suggest a balanced mix of chemical fertilizers (like Urea, DAP, MOP) with dosages appropriate for the land size. If soil test data is available, tailor the nutrient recommendations accordingly.
+    2.  Provide a list of 2-3 suggestions for long-term soil health improvement. This could include crop rotation, green manuring, incorporating crop residue, etc.
+    `,
+});
+
 const fertilizerAndSoilAdviceFlow = ai.defineFlow(
   {
     name: 'fertilizerAndSoilAdviceFlow',
@@ -37,17 +64,7 @@ const fertilizerAndSoilAdviceFlow = ai.defineFlow(
     outputSchema: FertilizerAndSoilAdviceOutputSchema,
   },
   async (input) => {
-    return {
-      fertilizerSuggestions: [
-        { suggestion: "Apply 5-10 tons of Farm Yard Manure (FYM) or compost per acre about a month before sowing to improve soil structure and nutrient content." },
-        { suggestion: `For your ${input.cropSelected || 'crop'}, a basal dose of 50kg DAP and 25kg Muriate of Potash per acre is a good starting point for chemical fertilizers.` },
-        { suggestion: "If you prefer organic, use vermicompost (1-2 tons/acre) and a bio-fertilizer like Azotobacter to enhance nitrogen fixation." }
-      ],
-      soilImprovementSuggestions: [
-        { suggestion: "Practice crop rotation with a leguminous crop like green gram (moong) to naturally fix nitrogen in the soil." },
-        { suggestion: "Incorporate crop residues back into the soil after harvest to increase organic matter." },
-        { suggestion: "Consider green manuring by growing crops like sunnhemp or dhaincha and ploughing them into the soil before they flower." }
-      ],
-    };
+    const { output } = await fertilizerAndSoilAdvicePrompt(input);
+    return output;
   }
 );

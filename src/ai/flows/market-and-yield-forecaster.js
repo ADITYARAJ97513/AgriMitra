@@ -29,6 +29,31 @@ export async function marketAndYieldForecast(input) {
   return marketAndYieldForecastFlow(input);
 }
 
+const marketAndYieldForecastPrompt = ai.definePrompt({
+    name: 'marketAndYieldForecastPrompt',
+    model: 'googleai/gemini-1.5-flash-latest',
+    input: { schema: MarketAndYieldForecastInputSchema },
+    output: { schema: MarketAndYieldForecastOutputSchema },
+    prompt: `You are an agricultural market analyst for the Indian market. A farmer wants a forecast.
+
+    Details:
+    - Crop: {{{cropName}}}
+    {{#if cropVariety}}- Variety: {{{cropVariety}}}{{/if}}
+    - Location: {{{location}}}
+    - Land Size: {{{landSize}}} acres
+    - Farming Method: {{{farmingMethod}}}
+    - Expected Harvest: {{{expectedHarvestMonth}}}
+    {{#if inputCosts}}- Estimated Input Costs: Rs. {{{inputCosts}}}{{/if}}
+    {{#if mandiPreference}}- Preferred Market: {{{mandiPreference}}}{{/if}}
+
+    Your tasks:
+    1.  Provide a realistic yield estimation in quintals per acre.
+    2.  Give market advice: What are the expected prices in their location around harvest time? Should they sell immediately or store? Mention any relevant demand trends.
+    3.  If input costs are provided, create a simple profit analysis (Estimated Yield * Estimated Price - Input Costs). If not, return an empty string for this field.
+    `,
+});
+
+
 const marketAndYieldForecastFlow = ai.defineFlow(
   {
     name: 'marketAndYieldForecastFlow',
@@ -36,18 +61,7 @@ const marketAndYieldForecastFlow = ai.defineFlow(
     outputSchema: MarketAndYieldForecastOutputSchema,
   },
   async (input) => {
-    let profitAnalysis = "";
-    if (input.inputCosts) {
-      const costs = parseFloat(input.inputCosts);
-      const revenue = 20 * 2200; // Mock yield * mock price
-      const profit = revenue - costs;
-      profitAnalysis = `With an estimated input cost of Rs. ${costs}, and a potential revenue of Rs. ${revenue} (based on 20 quintals at Rs. 2200/quintal), your estimated profit could be around Rs. ${profit}. This is just an estimate.`;
-    }
-
-    return {
-      yieldEstimation: `For ${input.cropName} using a ${input.farmingMethod} method on ${input.landSize} acres, a realistic yield would be between 18-22 quintals per acre.`,
-      marketAdvice: `The market price for ${input.cropName} in ${input.location} during ${input.expectedHarvestMonth} is expected to be around Rs. 2100-2350 per quintal. Prices are often lower immediately after harvest, so if you have storage capacity, waiting a month could fetch a better price.`,
-      profitAnalysis: profitAnalysis,
-    };
+    const { output } = await marketAndYieldForecastPrompt(input);
+    return output;
   }
 );

@@ -30,6 +30,27 @@ export async function getGovtSchemes(input) {
   return govtSchemesAdvisorFlow(input);
 }
 
+const govtSchemesAdvisorPrompt = ai.definePrompt({
+    name: 'govtSchemesAdvisorPrompt',
+    model: 'googleai/gemini-1.5-flash-latest',
+    input: { schema: GetGovtSchemesInputSchema },
+    output: { schema: GetGovtSchemesOutputSchema },
+    prompt: `You are an expert on Indian government agricultural schemes. A farmer has provided their details. Identify the top 2-3 most relevant central or state-specific government schemes they might be eligible for.
+
+    Farmer Profile:
+    - State: {{{state}}}
+    - Landholding Size: {{{landholdingSize}}} acres
+    - Main Crops: {{{cropsGrown}}}
+    - Farmer Category: {{{farmerCategory}}}
+
+    For each recommended scheme, provide:
+    1. The official name of the scheme.
+    2. A brief, easy-to-understand summary.
+    3. Key eligibility criteria, tailored to the farmer's profile.
+    4. A simple, step-by-step guide on how to apply.
+    `,
+});
+
 const govtSchemesAdvisorFlow = ai.defineFlow(
   {
     name: 'govtSchemesAdvisorFlow',
@@ -37,21 +58,7 @@ const govtSchemesAdvisorFlow = ai.defineFlow(
     outputSchema: GetGovtSchemesOutputSchema,
   },
   async (input) => {
-    return {
-      schemes: [
-        {
-          name: "Pradhan Mantri Kisan Samman Nidhi (PM-KISAN)",
-          summary: "Provides income support of Rs. 6,000 per year to all landholding farmer families.",
-          eligibility: `Applicable to all landholding farmer families, especially beneficial for the '${input.farmerCategory}' category.`,
-          howToApply: "1. Visit the official PM-KISAN portal.\n2. Click on 'New Farmer Registration'.\n3. Enter your Aadhaar number, mobile number, and state.\n4. Fill in the required details and upload land documents."
-        },
-        {
-          name: "Pradhan Mantri Fasal Bima Yojana (PMFBY)",
-          summary: "Provides insurance coverage and financial support to farmers in the event of failure of any of the notified crops as a result of natural calamities, pests & diseases.",
-          eligibility: `All farmers growing notified crops like '${input.cropsGrown}' in a notified area during the season who have insurable interest in the crop are eligible.`,
-          howToApply: "1. Contact your nearest bank, Primary Agricultural Credit Society (PACS), or a Common Service Center (CSC).\n2. Fill out the application form and provide details of your land and crops.\n3. Pay the nominal premium amount."
-        }
-      ]
-    };
+    const { output } = await govtSchemesAdvisorPrompt(input);
+    return output;
   }
 );

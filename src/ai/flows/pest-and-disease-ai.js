@@ -22,12 +22,36 @@ const PestAndDiseaseAIOutputSchema = z.object({
   diseaseThreats: z.array(z.string()).describe('A list of likely disease threats based on the input.'),
   preventativeMeasures: z.array(z.string()).describe('A list of measures to prevent these issues.'),
   organicTreatments: z.array(z.string()).describe('A list of organic treatment options.'),
-  chemicalTreatments: z.array(z.string()).describe('A list of chemical treatment options. Provide only if organic preference is "No".'),
+  chemicalTreatments: z.array(z.string()).describe('A list of chemical treatment options. Provide only if organic preference is "No" or if it is an emergency.'),
 });
 
 export async function pestAndDiseaseAI(input) {
   return pestAndDiseaseFlow(input);
 }
+
+const pestAndDiseasePrompt = ai.definePrompt({
+    name: 'pestAndDiseasePrompt',
+    model: 'googleai/gemini-1.5-flash-latest',
+    input: { schema: PestAndDiseaseAIInputSchema },
+    output: { schema: PestAndDiseaseAIOutputSchema },
+    prompt: `You are a plant pathologist and entomologist specializing in Indian agriculture. A farmer needs help identifying and managing potential issues.
+
+    Farmer's Report:
+    - Crop: {{{cropType}}}
+    - Growth Stage: {{{growthStage}}}
+    - Symptoms Observed: {{{symptomsObserved}}}
+    - Prefers Organic Solutions: {{{organicPreference}}}
+    {{#if weatherConditions}}- Current Weather: {{{weatherConditions}}}{{/if}}
+    {{#if chemicalsUsedEarlier}}- Previously Used Chemicals: {{{chemicalsUsedEarlier}}}{{/if}}
+
+    Based on this, please provide:
+    1.  A list of 2-3 likely pest threats.
+    2.  A list of 2-3 likely disease threats.
+    3.  A list of practical preventative measures.
+    4.  A list of effective organic treatment options.
+    5.  If the farmer's preference is 'No' for organic OR if the symptoms suggest a severe infestation requiring immediate action, provide a list of appropriate chemical treatments with cautions. Otherwise, this list should be empty.
+    `,
+});
 
 const pestAndDiseaseFlow = ai.defineFlow(
   {
@@ -36,26 +60,7 @@ const pestAndDiseaseFlow = ai.defineFlow(
     outputSchema: PestAndDiseaseAIOutputSchema,
   },
   async (input) => {
-    const organicTreatments = [
-      "Spray a solution of Neem Oil (5ml per liter of water) with a few drops of liquid soap. It's effective against a wide range of soft-bodied insects.",
-      "For fungal issues, a spray of diluted buttermilk or a solution of baking soda (1 teaspoon per liter of water) can be effective as a preventative measure.",
-      "Set up yellow sticky traps to monitor and control populations of aphids and whiteflies."
-    ];
-    const chemicalTreatments = input.organicPreference === 'No' ? [
-      "For sucking pests like aphids, consider a systemic insecticide like Imidacloprid 17.8% SL. Always follow the dosage instructions on the label.",
-      "For fungal diseases, a broad-spectrum fungicide like Mancozeb can be used. Ensure proper coverage."
-    ] : [];
-
-    return {
-      pestThreats: ["Aphids", "Whiteflies", "Stem Borer"],
-      diseaseThreats: ["Powdery Mildew", "Leaf Spot", "Rust"],
-      preventativeMeasures: [
-        "Ensure proper spacing between plants for good air circulation to reduce fungal growth.",
-        "Remove and destroy infected plant parts immediately to prevent spread.",
-        "Encourage beneficial insects like ladybugs and lacewings by planting companion flowers."
-      ],
-      organicTreatments: organicTreatments,
-      chemicalTreatments: chemicalTreatments,
-    };
+    const { output } = await pestAndDiseasePrompt(input);
+    return output;
   }
 );

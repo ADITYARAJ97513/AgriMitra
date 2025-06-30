@@ -32,6 +32,39 @@ export async function recommendCrops(input) {
   return recommendCropsFlow(input);
 }
 
+const recommendCropsPrompt = ai.definePrompt(
+  {
+    name: 'recommendCropsPrompt',
+    model: 'googleai/gemini-1.5-flash-latest',
+    input: { schema: RecommendCropsInputSchema },
+    output: { schema: RecommendCropsOutputSchema },
+    prompt: `You are an expert agricultural advisor in India. A farmer has provided the following details. Your task is to recommend suitable crops and provide a comprehensive guide.
+
+    Farmer's Details:
+    - Location: {{{location}}}
+    - Soil Type: {{{soilType}}}
+    - Season: {{{season}}}
+    - Land Size: {{{landSize}}} acres
+    - Irrigation Available: {{{irrigationAvailable}}}
+    - Budget: {{{budgetLevel}}}
+    {{#if preferredCrops}}- Preferred Crops: {{{preferredCrops}}}{{/if}}
+    {{#if pastCrops}}- Crops Grown Last Season: {{{pastCrops}}}{{/if}}
+
+    Based on these details, please provide:
+    1.  A list of 3-4 suitable crops.
+    2.  Fertilizer advice for the top recommended crop.
+    3.  Pest and disease control measures for the recommended crops.
+    4.  Weather precautions for the season.
+    5.  An estimated yield for the primary crop.
+    6.  Market advice for selling the produce.
+    7.  A motivational message for the farmer.
+
+    Your response should be practical, tailored to Indian farming conditions, and easy for a farmer to understand.
+    `,
+  }
+);
+
+
 const recommendCropsFlow = ai.defineFlow(
   {
     name: 'recommendCropsFlow',
@@ -39,20 +72,7 @@ const recommendCropsFlow = ai.defineFlow(
     outputSchema: RecommendCropsOutputSchema,
   },
   async (input) => {
-    return {
-      crops: ['Wheat', 'Mustard', 'Gram', 'Barley'],
-      fertilizerSuggestions:
-        'For the primary crop (Wheat), a balanced NPK fertilizer (12:32:16) at the time of sowing is recommended. Follow up with Urea after the first irrigation.',
-      pestDiseaseControl:
-        'Watch out for aphids and rust disease. Use neem oil spray as a preventive measure for aphids. For rust, ensure good air circulation and use a recommended fungicide if infection is severe.',
-      weatherPrecautions:
-        'Be prepared for cold waves in December and January. Light irrigation can protect the crop from frost damage.',
-      estimatedYield:
-        'With good practices, you can expect a yield of about 15-20 quintals per acre.',
-      marketAdvice:
-        'Market prices for wheat are generally stable post-harvest in April. Consider selling in May for potentially better prices.',
-      motivationalMessage:
-        'A well-planned crop leads to a bountiful harvest. Keep up the great work!',
-    };
+    const { output } = await recommendCropsPrompt(input);
+    return output;
   }
 );

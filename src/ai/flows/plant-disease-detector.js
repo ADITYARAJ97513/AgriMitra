@@ -27,6 +27,29 @@ export async function detectPlantDisease(input) {
   return detectPlantDiseaseFlow(input);
 }
 
+const detectPlantDiseasePrompt = ai.definePrompt({
+    name: 'detectPlantDiseasePrompt',
+    model: 'googleai/gemini-1.5-flash-latest',
+    input: { schema: DetectPlantDiseaseInputSchema },
+    output: { schema: DetectPlantDiseaseOutputSchema },
+    prompt: `You are an expert botanist specializing in diagnosing plant illnesses from images. Analyze the provided image and information to identify plant diseases.
+
+    You will use this information to diagnose the plant.
+    1. First, determine if the image contains a plant leaf. Set 'isPlant' accordingly.
+    2. If it is a plant, identify the disease. If it looks healthy, the disease should be "Healthy".
+    3. Provide a clear description of the disease's symptoms.
+    4. Provide an actionable solution, offering both organic and chemical treatments where appropriate.
+
+    Context:
+    - Image: {{media url=photoDataUri}}
+    - Crop Type: {{{cropType}}}
+    - Growth Stage: {{{growthStage}}}
+    {{#if location}}- Location: {{{location}}}{{/if}}
+    {{#if symptomsObserved}}- Additional Symptoms: {{{symptomsObserved}}}{{/if}}
+    `,
+});
+
+
 const detectPlantDiseaseFlow = ai.defineFlow(
   {
     name: 'detectPlantDiseaseFlow',
@@ -34,13 +57,7 @@ const detectPlantDiseaseFlow = ai.defineFlow(
     outputSchema: DetectPlantDiseaseOutputSchema,
   },
   async (input) => {
-    // This is a mock response. In a real scenario, the image would be analyzed.
-    // We'll return a sample diagnosis.
-    return {
-      isPlant: true,
-      disease: "Tomato Early Blight",
-      description: "Early blight is a common fungal disease characterized by dark, concentric rings forming on the lower leaves, often resembling a target. The leaves may yellow and drop.",
-      solution: "Remove and destroy affected lower leaves. Ensure good air circulation. For organic treatment, use a copper-based fungicide spray. For chemical options, fungicides containing mancozeb or chlorothalonil are effective. Avoid overhead watering.",
-    };
+    const { output } = await detectPlantDiseasePrompt(input);
+    return output;
   }
 );
