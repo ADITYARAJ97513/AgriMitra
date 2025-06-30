@@ -21,6 +21,7 @@ export default function LoginPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   useEffect(() => {
+    // If the auth state is not loading and a user exists, redirect them to the home page.
     if (!loading && user) {
       router.push('/');
     }
@@ -41,19 +42,22 @@ export default function LoginPage() {
         title: 'Login Successful',
         description: 'Welcome back!',
       });
-      router.push('/');
+      // On success, the `useEffect` above will trigger the redirect when the `user` state updates.
+      // We don't set `isSubmitting` to false here, so the button remains disabled during redirection.
     } catch (error) {
       toast({
         variant: 'destructive',
         title: 'Login Failed',
         description: error.message || 'An unexpected error occurred. Please try again.',
       });
-    } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(false); // Re-enable button only on failure.
     }
   };
 
-  if (loading || user) {
+  // Show a spinner only during the initial auth check on page load.
+  // The previous logic (`if (loading || user)`) caused the "buffering" issue
+  // by showing the spinner again after a successful login.
+  if (loading) {
     return (
       <div className="flex h-screen w-full items-center justify-center">
         <Loader2 className="h-16 w-16 animate-spin text-primary" />
