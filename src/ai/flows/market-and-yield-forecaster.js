@@ -33,6 +33,7 @@ const marketAndYieldForecastPrompt = ai.definePrompt({
   name: 'marketAndYieldForecastPrompt',
   input: { schema: MarketAndYieldForecastInputSchema },
   output: { schema: MarketAndYieldForecastOutputSchema },
+  model: 'googleai/gemini-1.5-flash-latest',
   prompt: `You are an expert agricultural market analyst for India. Provide a yield and market forecast based on the following information.
 
   **Crop Details:**
@@ -62,7 +63,6 @@ const marketAndYieldForecastFlow = ai.defineFlow(
   async (input) => {
     const { output } = await ai.generate({
       prompt: marketAndYieldForecastPrompt,
-      model: 'googleai/gemini-1.5-flash-latest',
       input: input,
     });
     return output;

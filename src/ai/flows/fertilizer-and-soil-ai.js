@@ -34,6 +34,7 @@ const fertilizerAndSoilAdvicePrompt = ai.definePrompt({
   name: 'fertilizerAndSoilAdvicePrompt',
   input: { schema: FertilizerAndSoilAdviceInputSchema },
   output: { schema: FertilizerAndSoilAdviceOutputSchema },
+  model: 'googleai/gemini-1.5-flash-latest',
   prompt: `You are an expert soil scientist and agronomist advising an Indian farmer. Provide fertilizer and soil health recommendations based on the details below.
 
   **Farm Details:**
@@ -67,7 +68,6 @@ const fertilizerAndSoilAdviceFlow = ai.defineFlow(
   async (input) => {
     const { output } = await ai.generate({
       prompt: fertilizerAndSoilAdvicePrompt,
-      model: 'googleai/gemini-1.5-flash-latest',
       input: input,
     });
     return output;

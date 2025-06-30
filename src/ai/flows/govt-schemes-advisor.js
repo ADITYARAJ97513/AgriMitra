@@ -34,6 +34,7 @@ const govtSchemesAdvisorPrompt = ai.definePrompt({
   name: 'govtSchemesAdvisorPrompt',
   input: { schema: GetGovtSchemesInputSchema },
   output: { schema: GetGovtSchemesOutputSchema },
+  model: 'googleai/gemini-1.5-flash-latest',
   prompt: `You are an advisor specializing in Indian government agricultural schemes. Based on the farmer's profile below, identify and detail 2-3 of the most relevant central or state-specific schemes.
 
   **Farmer Profile:**
@@ -63,7 +64,6 @@ const govtSchemesAdvisorFlow = ai.defineFlow(
   async (input) => {
     const { output } = await ai.generate({
       prompt: govtSchemesAdvisorPrompt,
-      model: 'googleai/gemini-1.5-flash-latest',
       input: input,
     });
     return output;

@@ -33,6 +33,7 @@ const pestAndDiseasePrompt = ai.definePrompt({
   name: 'pestAndDiseasePrompt',
   input: { schema: PestAndDiseaseAIInputSchema },
   output: { schema: PestAndDiseaseAIOutputSchema },
+  model: 'googleai/gemini-1.5-flash-latest',
   prompt: `You are an expert plant pathologist for Indian agriculture. Analyze the farmer's situation and provide pest and disease control advice.
 
   **Farmer's Report:**
@@ -61,7 +62,6 @@ const pestAndDiseaseFlow = ai.defineFlow(
   async (input) => {
     const { output } = await ai.generate({
       prompt: pestAndDiseasePrompt,
-      model: 'googleai/gemini-1.5-flash-latest',
       input: input,
     });
     return output;

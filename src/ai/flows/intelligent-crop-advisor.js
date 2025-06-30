@@ -36,6 +36,7 @@ const recommendCropsPrompt = ai.definePrompt({
   name: 'recommendCropsPrompt',
   input: { schema: RecommendCropsInputSchema },
   output: { schema: RecommendCropsOutputSchema },
+  model: 'googleai/gemini-1.5-flash-latest',
   prompt: `You are an expert agricultural advisor for Indian farmers. Based on the following details, provide a detailed crop recommendation.
 
   **Farmer's Details:**
@@ -65,7 +66,6 @@ const recommendCropsFlow = ai.defineFlow(
   async (input) => {
     const { output } = await ai.generate({
       prompt: recommendCropsPrompt,
-      model: 'googleai/gemini-1.5-flash-latest',
       input: input,
     });
     return output;

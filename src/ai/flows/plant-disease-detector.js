@@ -31,6 +31,7 @@ const detectPlantDiseasePrompt = ai.definePrompt({
   name: 'detectPlantDiseasePrompt',
   input: { schema: DetectPlantDiseaseInputSchema },
   output: { schema: DetectPlantDiseaseOutputSchema },
+  model: 'googleai/gemini-1.5-flash-latest',
   prompt: `You are a plant disease detection expert. Analyze the provided image and information to diagnose the plant's health.
 
   **Context:**
@@ -63,7 +64,6 @@ const detectPlantDiseaseFlow = ai.defineFlow(
   async (input) => {
     const { output } = await ai.generate({
       prompt: detectPlantDiseasePrompt,
-      model: 'googleai/gemini-1.5-flash-latest',
       input: input,
     });
     return output;
