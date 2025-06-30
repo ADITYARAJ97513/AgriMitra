@@ -12,6 +12,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Terminal, Loader2 } from 'lucide-react';
+import { Label } from '@/components/ui/label';
 
 const GoogleIcon = (props) => (
     <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" {...props}>
@@ -35,6 +36,14 @@ const getAuthErrorMessage = (error) => {
             return 'The password is too weak. Please choose a stronger password.';
         case 'auth/too-many-requests':
             return 'Too many requests from this device. Please try again later.';
+        case 'auth/configuration-not-found':
+            return 'Phone sign-in is not enabled for this Firebase project. Please enable it in the Firebase console.';
+        case 'auth/billing-not-enabled':
+            return 'Phone number sign-in requires the Firebase Blaze plan. This feature has been disabled.';
+        case 'auth/invalid-phone-number':
+            return 'Invalid phone number format. Please try again.';
+        case 'auth/invalid-verification-code':
+            return 'Invalid OTP. Please try again.';
         default:
             return error.message || 'An unexpected error occurred. Please try again.';
     }
