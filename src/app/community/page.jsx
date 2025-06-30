@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState } from 'react';
@@ -12,7 +13,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import PostCard from '@/components/community/PostCard';
 
 export default function CommunityPage() {
-  const { user, firebaseEnabled } = useAuth();
+  const { user } = useAuth();
   const [posts, setPosts] = useState(initialPosts);
   const [newQuestion, setNewQuestion] = useState('');
 
@@ -69,7 +70,7 @@ export default function CommunityPage() {
             <p className="text-muted-foreground mt-2">Ask questions and get answers from fellow farmers and experts.</p>
         </div>
 
-        {user && firebaseEnabled ? (
+        {user ? (
             <Card className="mb-8 bg-white">
             <CardHeader>
                 <CardTitle>Ask a New Question</CardTitle>

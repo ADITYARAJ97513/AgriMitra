@@ -1,8 +1,9 @@
+
 'use client';
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { Leaf, Menu, X, LogOut, UserCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/context/AuthContext';
@@ -12,7 +13,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 export function Nav() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const pathname = usePathname();
-  const router = useRouter();
   const { user, loading, logout } = useAuth();
   
   const publicPaths = ['/login', '/signup'];
@@ -34,7 +34,6 @@ export function Nav() {
 
   const handleLogout = async () => {
     await logout();
-    router.push('/login');
     setIsMenuOpen(false);
   };
 

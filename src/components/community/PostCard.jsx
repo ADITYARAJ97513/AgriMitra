@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState } from 'react';
@@ -8,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { Textarea } from '@/components/ui/textarea';
 
 export default function PostCard({ post, onAddAnswer, onUpvoteAnswer }) {
-  const { user, firebaseEnabled } = useAuth();
+  const { user } = useAuth();
   const [answerText, setAnswerText] = useState('');
 
   const onAnswerSubmit = (e) => {
@@ -48,7 +49,7 @@ export default function PostCard({ post, onAddAnswer, onUpvoteAnswer }) {
             <p className="text-muted-foreground text-sm">No answers yet. Be the first to help!</p>
         )}
       </CardContent>
-      {user && firebaseEnabled && (
+      {user && (
         <CardFooter>
           <form onSubmit={onAnswerSubmit} className="w-full flex items-start gap-4">
             <div className="flex-1 space-y-2">
