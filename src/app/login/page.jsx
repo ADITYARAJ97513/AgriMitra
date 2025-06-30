@@ -44,6 +44,8 @@ const getAuthErrorMessage = (error) => {
             return 'Too many requests from this device. Please try again later.';
         case 'auth/invalid-verification-code':
             return 'Invalid OTP. Please try again.';
+        case 'auth/configuration-not-found':
+            return 'Phone sign-in is not enabled for this project. Please enable it in the Firebase console under Authentication > Sign-in method.';
         default:
             return error.message || 'An unexpected error occurred. Please try again.';
     }
