@@ -33,12 +33,10 @@ const getAuthErrorMessage = (error) => {
             return 'This email is already in use. Please log in or use a different email.';
         case 'auth/weak-password':
             return 'The password is too weak. Please choose a stronger password.';
-        case 'auth/invalid-phone-number':
-            return 'Invalid phone number format. Please include the country code (e.g., +91).';
         case 'auth/too-many-requests':
             return 'Too many requests from this device. Please try again later.';
-        case 'auth/invalid-verification-code':
-            return 'Invalid OTP. Please try again.';
+        case 'auth/unauthorized-domain':
+            return 'This domain is not authorized for authentication. Please add it to the list of authorized domains in your Firebase project settings.';
         default:
             return error.message || 'An unexpected error occurred. Please try again.';
     }

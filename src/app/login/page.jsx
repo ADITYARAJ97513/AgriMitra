@@ -36,14 +36,8 @@ const getAuthErrorMessage = (error) => {
             return 'The password is too weak. Please choose a stronger password.';
         case 'auth/too-many-requests':
             return 'Too many requests from this device. Please try again later.';
-        case 'auth/configuration-not-found':
-            return 'Phone sign-in is not enabled for this Firebase project. Please enable it in the Firebase console.';
-        case 'auth/billing-not-enabled':
-            return 'Phone number sign-in requires the Firebase Blaze plan. This feature has been disabled.';
-        case 'auth/invalid-phone-number':
-            return 'Invalid phone number format. Please try again.';
-        case 'auth/invalid-verification-code':
-            return 'Invalid OTP. Please try again.';
+        case 'auth/unauthorized-domain':
+            return 'This domain is not authorized for authentication. Please add it to the list of authorized domains in your Firebase project settings.';
         default:
             return error.message || 'An unexpected error occurred. Please try again.';
     }
