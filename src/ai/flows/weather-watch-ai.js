@@ -23,7 +23,15 @@ const GetWeatherAlertsOutputSchema = z.object({
 });
 
 export async function getWeatherAlerts(input) {
-  return weatherWatchFlow(input);
+  if (!process.env.GOOGLE_API_KEY) {
+    return { error: 'Server is missing GOOGLE_API_KEY. Please configure it in the .env file.' };
+  }
+  try {
+    return await weatherWatchFlow(input);
+  } catch (e) {
+    console.error(e);
+    return { error: 'An error occurred while communicating with the AI service. Please check the server logs and API key.' };
+  }
 }
 
 const weatherWatchPrompt = ai.definePrompt({

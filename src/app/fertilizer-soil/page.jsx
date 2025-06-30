@@ -49,12 +49,15 @@ export default function FertilizerSoilPage() {
 
     try {
       const advice = await getFertilizerAndSoilAdvice(submissionValues);
+      if (advice.error) {
+        throw new Error(advice.error);
+      }
       setResult(advice);
     } catch (error) {
       toast({
         variant: 'destructive',
         title: 'Error',
-        description: 'Failed to get advice. Please try again.',
+        description: error.message || 'Failed to get advice. Please try again.',
       });
       console.error(error);
     } finally {

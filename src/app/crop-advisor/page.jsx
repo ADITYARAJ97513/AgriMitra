@@ -33,12 +33,15 @@ export default function CropAdvisorPage() {
 
     try {
       const cropAdvice = await recommendCrops(values);
+      if (cropAdvice.error) {
+        throw new Error(cropAdvice.error);
+      }
       setResult(cropAdvice);
     } catch (error) {
       toast({
         variant: 'destructive',
         title: 'Error',
-        description: 'Failed to get crop advice. Please try again.',
+        description: error.message || 'Failed to get crop advice. Please try again.',
       });
       console.error(error);
     } finally {

@@ -79,13 +79,16 @@ export default function DiseaseDetectionPage() {
     try {
       const formValues = form.getValues();
       const response = await detectPlantDisease({ photoDataUri, ...formValues });
+      if (response.error) {
+        throw new Error(response.error);
+      }
       setResult(response);
     } catch (error) {
       console.error('Error detecting disease:', error);
       toast({
         variant: 'destructive',
         title: 'Detection Failed',
-        description: 'An error occurred while analyzing the image. Please try again.',
+        description: error.message || 'An error occurred while analyzing the image. Please try again.',
       });
     } finally {
       setLoading(false);

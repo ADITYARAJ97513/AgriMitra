@@ -34,12 +34,15 @@ export default function MarketYieldPage() {
 
     try {
       const forecast = await marketAndYieldForecast(values);
+      if (forecast.error) {
+        throw new Error(forecast.error);
+      }
       setResult(forecast);
     } catch (error) {
       toast({
         variant: 'destructive',
         title: 'Error',
-        description: 'Failed to get forecast. Please try again.',
+        description: error.message || 'Failed to get forecast. Please try again.',
       });
       console.error(error);
     } finally {

@@ -27,7 +27,15 @@ const FertilizerAndSoilAdviceOutputSchema = z.object({
 });
 
 export async function getFertilizerAndSoilAdvice(input) {
-  return fertilizerAndSoilAdviceFlow(input);
+  if (!process.env.GOOGLE_API_KEY) {
+    return { error: 'Server is missing GOOGLE_API_KEY. Please configure it in the .env file.' };
+  }
+  try {
+    return await fertilizerAndSoilAdviceFlow(input);
+  } catch (e) {
+    console.error(e);
+    return { error: 'An error occurred while communicating with the AI service. Please check the server logs and API key.' };
+  }
 }
 
 const fertilizerAndSoilAdvicePrompt = ai.definePrompt({

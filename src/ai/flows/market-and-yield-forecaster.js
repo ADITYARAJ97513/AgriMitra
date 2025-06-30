@@ -26,7 +26,15 @@ const MarketAndYieldForecastOutputSchema = z.object({
 });
 
 export async function marketAndYieldForecast(input) {
-  return marketAndYieldForecastFlow(input);
+  if (!process.env.GOOGLE_API_KEY) {
+    return { error: 'Server is missing GOOGLE_API_KEY. Please configure it in the .env file.' };
+  }
+  try {
+    return await marketAndYieldForecastFlow(input);
+  } catch (e) {
+    console.error(e);
+    return { error: 'An error occurred while communicating with the AI service. Please check the server logs and API key.' };
+  }
 }
 
 const marketAndYieldForecastPrompt = ai.definePrompt({

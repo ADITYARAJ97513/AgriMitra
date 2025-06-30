@@ -32,12 +32,15 @@ export default function WeatherWatchPage() {
 
     try {
       const alerts = await getWeatherAlerts(values);
+      if (alerts.error) {
+        throw new Error(alerts.error);
+      }
       setResult(alerts);
     } catch (error) {
       toast({
         variant: 'destructive',
         title: 'Error',
-        description: 'Failed to get weather alerts. Please try again.',
+        description: error.message || 'Failed to get weather alerts. Please try again.',
       });
       console.error(error);
     } finally {

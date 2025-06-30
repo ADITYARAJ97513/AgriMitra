@@ -33,12 +33,15 @@ export default function PestDiseasePage() {
 
     try {
       const advice = await pestAndDiseaseAI(values);
+      if (advice.error) {
+        throw new Error(advice.error);
+      }
       setResult(advice);
     } catch (error) {
       toast({
         variant: 'destructive',
         title: 'Error',
-        description: 'Failed to get advice. Please try again.',
+        description: error.message || 'Failed to get advice. Please try again.',
       });
       console.error(error);
     } finally {

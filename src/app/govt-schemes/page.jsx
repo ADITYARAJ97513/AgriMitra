@@ -32,12 +32,15 @@ export default function GovtSchemesPage() {
 
     try {
       const schemes = await getGovtSchemes(values);
+      if (schemes.error) {
+        throw new Error(schemes.error);
+      }
       setResult(schemes);
     } catch (error) {
       toast({
         variant: 'destructive',
         title: 'Error',
-        description: 'Failed to get scheme information. Please try again.',
+        description: error.message || 'Failed to get scheme information. Please try again.',
       });
       console.error(error);
     } finally {
