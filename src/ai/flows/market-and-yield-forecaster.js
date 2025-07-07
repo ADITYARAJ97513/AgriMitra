@@ -1,4 +1,5 @@
 'use server';
+
 /**
  * @fileOverview An AI agent that provides yield estimation and market advice for farmers using OpenRouter.
  */
@@ -7,24 +8,24 @@ import { z } from 'zod';
 
 // ✅ Input Schema
 const MarketAndYieldForecastInputSchema = z.object({
-  cropName: z.string().describe('Name of the crop.'),
-  location: z.string().describe('Location (District, State) for market price context.'),
-  landSize: z.string().describe('Land size in acres.'),
-  farmingMethod: z.string().describe('Farming method used (e.g., Organic, Traditional, High-yield hybrid).'),
-  expectedHarvestMonth: z.string().describe('The month the harvest is expected.'),
-  cropVariety: z.string().optional().describe('Specific variety of the crop, if known.'),
-  inputCosts: z.string().optional().describe('Total input costs in Rupees, if available.'),
-  mandiPreference: z.string().optional().describe('Preferred local market (mandi).'),
+  cropName: z.string(),
+  location: z.string(),
+  landSize: z.string(),
+  farmingMethod: z.string(),
+  expectedHarvestMonth: z.string(),
+  cropVariety: z.string().optional(),
+  inputCosts: z.string().optional(),
+  mandiPreference: z.string().optional(),
 });
 
 // ✅ Output Schema
 const MarketAndYieldForecastOutputSchema = z.object({
-  yieldEstimation: z.string().describe('An estimated yield for the crop in quintals or tons per acre.'),
-  marketAdvice: z.string().describe('Advice on expected market prices, demand, and best time/place to sell.'),
-  profitAnalysis: z.string().describe('A simple profit analysis if input costs are provided, otherwise an empty string.'),
+  yieldEstimation: z.string(),
+  marketAdvice: z.string(),
+  profitAnalysis: z.string(),
 });
 
-// ✅ Entry point function
+// ✅ Main Exported Function
 export async function marketAndYieldForecast(input) {
   const validation = MarketAndYieldForecastInputSchema.safeParse(input);
   if (!validation.success) {
@@ -40,31 +41,33 @@ export async function marketAndYieldForecast(input) {
   } catch (e) {
     console.error('❌ OpenRouter Error:', e);
     return {
-      error: 'An error occurred while communicating with the AI service. Please check the logs or API key.',
+      error: '❌ Could not connect to AI service. Check logs or API key.',
     };
   }
 }
 
-// ✅ OpenRouter-powered AI function
+// ✅ OpenRouter Logic — English Only & Safe Parsing
 const marketAndYieldForecastFlow = async (input) => {
   const prompt = `
-You are an agricultural market analyst in India. A farmer has provided the following details:
+You are an agricultural market and yield advisor in India. A farmer shared this:
 
 - Crop: ${input.cropName}
 ${input.cropVariety ? `- Variety: ${input.cropVariety}` : ''}
 - Location: ${input.location}
 - Land Size: ${input.landSize} acres
 - Farming Method: ${input.farmingMethod}
-- Expected Harvest: ${input.expectedHarvestMonth}
+- Expected Harvest Month: ${input.expectedHarvestMonth}
 ${input.inputCosts ? `- Input Costs: Rs. ${input.inputCosts}` : ''}
 ${input.mandiPreference ? `- Preferred Mandi: ${input.mandiPreference}` : ''}
 
-Your tasks:
-1. Provide a realistic yield estimation in quintals per acre.
-2. Give market advice: price forecast, whether to sell immediately or store, and demand trends.
-3. If input costs are provided, do a simple profit analysis (Yield × Price - Input Costs). Else, leave this field empty.
+Your job:
+1. Estimate the yield per acre in quintals or tons.
+2. Give market advice (expected price, demand, whether to store/sell).
+3. If input cost is provided, estimate profit = (yield x price) - cost.
 
-Return your response in this exact JSON format:
+❗ Use only **simple English**. No Hindi. No Hinglish. Be clear and helpful.
+
+Respond only in this exact JSON structure:
 
 {
   "yieldEstimation": "...",
@@ -84,7 +87,7 @@ Return your response in this exact JSON format:
       messages: [
         {
           role: 'system',
-          content: 'You are a yield and market advisor for Indian farmers.',
+          content: 'You are a helpful agricultural assistant for Indian farmers. Use only simple English.',
         },
         {
           role: 'user',
@@ -104,7 +107,15 @@ Return your response in this exact JSON format:
   try {
     const parsed = JSON.parse(raw);
     const content = parsed.choices?.[0]?.message?.content ?? '{}';
-    const final = JSON.parse(content);
+
+    const sanitized = content
+      .replace(/[\b\f\n\r\t\v]/g, ' ')
+      .replace(/\\"/g, '"')
+      .replace(/\\n/g, ' ')
+      .trim();
+
+    const final = JSON.parse(sanitized);
+
     return MarketAndYieldForecastOutputSchema.parse(final);
   } catch (err) {
     console.error('❌ Failed to parse OpenRouter response:', err);

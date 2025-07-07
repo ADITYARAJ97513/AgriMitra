@@ -1,83 +1,84 @@
-'use server';
+"use server";
 
-/**
- * @fileOverview An AI agent that provides weather alerts and crop-specific recommendations using OpenRouter.
- */
-
-import { getWeatherForecast } from '@/services/weather';
-import { z } from 'zod';
+import { getWeatherForecast } from "@/services/weather";
+import { z } from "zod";
 
 // ✅ Input Schema
 const GetWeatherAlertsInputSchema = z.object({
   location: z.string().describe("The farmer's location."),
-  cropPlanned: z.string().optional().describe("The crop being planned or grown."),
+  cropPlanned: z
+    .string()
+    .optional()
+    .describe("The crop being planned or grown."),
 });
 
 // ✅ Output Schema
 const GetWeatherAlertsOutputSchema = z.object({
-  reportTitle: z.string().describe("The title of the weather report, e.g., 'Weather Forecast for Patna'"),
-  overallSummary: z.string().describe("A brief, human-readable summary of the weather."),
-  recommendations: z.array(z.string()).describe("A list of 2-3 actionable recommendations for the farmer."),
-  motivationalMessage: z.string().describe("A short, encouraging message for the farmer."),
+  reportTitle: z.string(),
+  overallSummary: z.string(),
+  recommendations: z.array(z.string()),
+  motivationalMessage: z.string(),
 });
 
-// ✅ Entry Point
+// ✅ Main Function
 export async function getWeatherAlerts(input) {
   const validation = GetWeatherAlertsInputSchema.safeParse(input);
   if (!validation.success) {
-    return { error: '❌ Invalid input. Please check the fields.' };
+    return { error: "❌ Invalid input. Please check the fields." };
   }
 
   if (!process.env.OPENROUTER_API_KEY) {
-    return { error: '❌ Missing OPENROUTER_API_KEY in .env file.' };
+    return { error: "❌ Missing OPENROUTER_API_KEY in .env file." };
   }
 
   try {
     return await weatherWatchFlow(input);
   } catch (e) {
-    console.error('❌ OpenRouter Weather AI Error:', e);
+    console.error("❌ OpenRouter Weather AI Error:", e);
     return {
-      error: 'An error occurred while communicating with OpenRouter. Please check logs.',
+      error: "❌ Could not connect to weather AI. Please try again later.",
     };
   }
 }
 
-// ✅ OpenRouter Flow with Fallback for Small Towns
+// ✅ Core Logic with Sanitation
 const weatherWatchFlow = async ({ location, cropPlanned }) => {
-  const normalizedLocation = location.trim().toLowerCase().replace(/\s+/g, ' ');
-  const forecast = await getWeatherForecast(normalizedLocation || 'default');
+  const normalizedLocation = location.trim().toLowerCase().replace(/\s+/g, " ");
+  const forecast = await getWeatherForecast(normalizedLocation || "default");
 
-  // ⛔ Fallback for unavailable data
   if (!forecast || !forecast.summary) {
     return {
       reportTitle: `Weather Report for ${location}`,
       overallSummary: `Sorry, weather data for "${location}" could not be fetched.`,
       recommendations: [
-        '✅ Try entering a nearby city or district name.',
-        '✅ Check spelling and avoid local town nicknames.',
+        "✅ Try entering a nearby city or district name.",
+        "✅ Check spelling and avoid local town nicknames.",
       ],
-      motivationalMessage: 'Keep going! Nature rewards the patient.',
+      motivationalMessage: "Keep going! Nature rewards the patient.",
     };
   }
 
   const prompt = `
-You are an agricultural weather advisor in India. A farmer at "${location}" is growing ${cropPlanned || "a crop"}.
+You are a kind weather advisor for Indian farmers.
 
-Here is their local weather forecast:
-- Summary: ${forecast.summary}
+Give weather and crop advice using only simple and clear English. Do not use Hindi or any Hindi-English mix.
+
+
+- Location: ${location}
+- Crop: ${cropPlanned || "Unknown"}
+- Weather Summary: ${forecast.summary}
 - Temperature: ${forecast.temperature}°C
-- Precipitation: ${forecast.precipitation}
-- Wind Speed: ${forecast.windSpeed} km/h
+- Rain/Precipitation: ${forecast.precipitation}
+- Wind: ${forecast.windSpeed} km/h
 - Humidity: ${forecast.humidity}%
 
 Tasks:
-1. Write a report title like "Weather Forecast for Patna".
-2. Give a clear summary of the weather (rain, heat, storms, etc.).
-3. List 2-3 simple recommendations tailored to the crop (or general if no crop is provided).
-4. Add a motivational message for the farmer.
+1. Title like "Weather Forecast for Patna".
+2. Simple explanation of the weather (rain, sun, storm, etc.).
+3. 2–3 easy farming tips.
+4. One motivational line.
 
-Respond in **this exact JSON** format:
-
+Strictly use this JSON format:
 {
   "reportTitle": "...",
   "overallSummary": "...",
@@ -86,21 +87,24 @@ Respond in **this exact JSON** format:
 }
 `;
 
-  const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-    method: 'POST',
+  const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+    method: "POST",
     headers: {
       Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: 'mistralai/mistral-7b-instruct',
+      model: "mistralai/mistral-7b-instruct",
       messages: [
         {
-          role: 'system',
-          content: 'You are a friendly agricultural weather assistant.',
+          role: "system",
+          content: `You are a kind weather assistant for Indian farmers. 
+          Always reply using very simple and clear ENGLISH only.
+          Do NOT use Hindi or Hindi-English mix.
+          Keep the tone friendly, short, and easy to understand for rural farmers.`,
         },
         {
-          role: 'user',
+          role: "user",
           content: prompt,
         },
       ],
@@ -108,7 +112,7 @@ Respond in **this exact JSON** format:
   });
 
   const raw = await res.text();
-  console.log('🔍 OpenRouter Weather Raw Response:', raw);
+  console.log("🔍 OpenRouter Raw Weather Response:", raw);
 
   if (!res.ok) {
     throw new Error(`OpenRouter API returned status ${res.status}`);
@@ -116,16 +120,24 @@ Respond in **this exact JSON** format:
 
   try {
     const parsed = JSON.parse(raw);
-    const content = parsed.choices?.[0]?.message?.content ?? '{}';
-    const final = JSON.parse(content);
+    const content = parsed.choices?.[0]?.message?.content ?? "{}";
+
+    const sanitized = content
+      .replace(/[\b\f\n\r\t\v]/g, " ")
+      .replace(/\\"/g, '"')
+      .replace(/\\n/g, " ")
+      .trim();
+
+    const final = JSON.parse(sanitized);
+
     return GetWeatherAlertsOutputSchema.parse(final);
   } catch (err) {
-    console.error('❌ Failed to parse weather response:', err);
+    console.error("❌ Failed to parse OpenRouter response:", err);
     return {
-      reportTitle: 'Weather Report Unavailable',
-      overallSummary: 'Could not interpret forecast data.',
+      reportTitle: "Weather Report Unavailable",
+      overallSummary: "⚠️ Could not understand AI response. Please try again.",
       recommendations: [],
-      motivationalMessage: '',
+      motivationalMessage: "",
     };
   }
 };

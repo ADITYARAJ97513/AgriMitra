@@ -1,38 +1,31 @@
 'use server';
-/**
- * @fileOverview An AI agent that suggests relevant government schemes for farmers in India.
- * - getGovtSchemes - A function that suggests relevant government schemes using OpenRouter.
- */
-
 import { z } from 'zod';
 
 // ✅ Input Schema
 const GetGovtSchemesInputSchema = z.object({
-  state: z.string().describe("The farmer's state of residence."),
-  landholdingSize: z.string().describe('The size of landholding in acres.'),
-  cropsGrown: z.string().describe('The main crops grown by the farmer.'),
-  farmerCategory: z.string().describe('The category of the farmer (e.g., Small and Marginal, Medium, Large).'),
+  state: z.string(),
+  landholdingSize: z.string(),
+  cropsGrown: z.string(),
+  farmerCategory: z.string(),
 });
 
 // ✅ Output Schema
 const GetGovtSchemesOutputSchema = z.object({
-  schemes: z
-    .array(
-      z.object({
-        name: z.string().describe('The official name of the government scheme.'),
-        summary: z.string().describe('A brief summary of what the scheme provides.'),
-        eligibility: z.string().describe('Key eligibility criteria for the scheme.'),
-        howToApply: z.string().describe('A simple step-by-step guide on how to apply.'),
-      })
-    )
-    .describe('A list of 2-3 relevant government schemes.'),
+  schemes: z.array(
+    z.object({
+      name: z.string(),
+      summary: z.string(),
+      eligibility: z.string(),
+      howToApply: z.string(),
+    })
+  ),
 });
 
-// ✅ Main exported function
+// ✅ Public export
 export async function getGovtSchemes(input) {
   const validation = GetGovtSchemesInputSchema.safeParse(input);
   if (!validation.success) {
-    return { error: '❌ Invalid input provided.' };
+    return { error: '❌ Invalid input provided. Please check the fields.' };
   }
 
   if (!process.env.OPENROUTER_API_KEY) {
@@ -44,37 +37,36 @@ export async function getGovtSchemes(input) {
   } catch (e) {
     console.error('❌ OpenRouter Error:', e);
     return {
-      error: 'An error occurred while communicating with the AI service. Please check the logs or API key.',
+      error: '❌ Failed to connect to the AI service. Please try again later.',
     };
   }
 }
 
-// ✅ OpenRouter-powered Flow Function
+// ✅ Internal AI call function
 const govtSchemesAdvisorFlow = async (input) => {
   const prompt = `
-You are an expert on Indian government agricultural schemes. Based on this farmer's profile, suggest 2-3 relevant central or state-level schemes they might qualify for:
+You are an expert in Indian government schemes for agriculture. A farmer has shared the following:
 
-Farmer Profile:
 - State: ${input.state}
-- Landholding Size: ${input.landholdingSize} acres
-- Main Crops: ${input.cropsGrown}
+- Land Size: ${input.landholdingSize} acres
+- Crops: ${input.cropsGrown}
 - Farmer Category: ${input.farmerCategory}
 
-For each scheme, include:
-1. The official name of the scheme
-2. A short summary of what the scheme offers
-3. Eligibility criteria for this farmer
-4. Step-by-step instructions on how to apply
+Your task is to:
+1. Suggest 2–3 government schemes (state or central) that are helpful to this farmer.
+2. Use **only clear and simple English**. Avoid Hindi or mixed Hindi-English.
+3. Keep the response short and easy to understand for rural farmers.
 
-Return your answer in **this exact JSON format**:
+Respond ONLY in this strict JSON format:
 {
   "schemes": [
     {
-      "name": "...",
-      "summary": "...",
-      "eligibility": "...",
-      "howToApply": "..."
-    }
+      "name": "Scheme Name",
+      "summary": "What benefits this scheme gives.",
+      "eligibility": "Who can apply.",
+      "howToApply": "Simple steps to apply."
+    },
+    ...
   ]
 }
 `;
@@ -90,7 +82,7 @@ Return your answer in **this exact JSON format**:
       messages: [
         {
           role: 'system',
-          content: 'You are a government agricultural scheme advisor for Indian farmers.',
+          content: 'You are a kind government scheme advisor who speaks only in clear English for Indian farmers.',
         },
         {
           role: 'user',
@@ -101,24 +93,42 @@ Return your answer in **this exact JSON format**:
   });
 
   const raw = await res.text();
-  console.log('🔍 OpenRouter Raw Response:', raw);
 
-  if (!res.ok) {
-    throw new Error(`OpenRouter API error: ${res.status}`);
+  let parsed;
+  try {
+    parsed = JSON.parse(raw);
+  } catch (err) {
+    console.error('❌ Failed to parse full AI response:', err);
+    return {
+      schemes: [
+        {
+          name: '❌ Invalid AI response',
+          summary: 'Unable to parse AI output.',
+          eligibility: 'N/A',
+          howToApply: 'N/A',
+        },
+      ],
+    };
   }
 
+  const content = parsed.choices?.[0]?.message?.content ?? '{}';
+
+  const sanitized = content
+    .replace(/[\b\f\n\r\t\v]/g, ' ')
+    .replace(/\\"/g, '"')
+    .replace(/\\n/g, ' ')
+    .trim();
+
   try {
-    const parsed = JSON.parse(raw);
-    const content = parsed.choices?.[0]?.message?.content ?? '{}';
-    const final = JSON.parse(content);
+    const final = JSON.parse(sanitized);
     return GetGovtSchemesOutputSchema.parse(final);
   } catch (err) {
     console.error('❌ Failed to parse OpenRouter response:', err);
     return {
       schemes: [
         {
-          name: 'Parsing Failed',
-          summary: 'Unable to interpret AI response.',
+          name: '❌ Parsing Error',
+          summary: 'Sorry, could not understand the AI response.',
           eligibility: 'N/A',
           howToApply: 'N/A',
         },

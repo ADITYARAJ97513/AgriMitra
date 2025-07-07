@@ -1,35 +1,30 @@
 'use server';
-/**
- * @fileOverview Provides crop recommendations to farmers based on their region, soil type, weather, and budget.
- * - recommendCrops - A function that handles the crop recommendation process using OpenRouter.
- */
-
 import { z } from 'zod';
 
 // ✅ Input Schema
 const RecommendCropsInputSchema = z.object({
-  location: z.string().describe("The farmer's location, e.g., Patna, Bihar"),
-  soilType: z.string().describe('The type of soil, e.g., Alluvial, Black, Red'),
-  season: z.string().describe('The current farming season, e.g., Kharif, Rabi, Zaid'),
-  landSize: z.string().describe('The size of the land in acres'),
-  irrigationAvailable: z.string().describe('Whether irrigation is available (Yes/No)'),
-  budgetLevel: z.string().describe("The farmer's budget level (Low, Medium, High)"),
-  preferredCrops: z.string().optional().describe('Crops the farmer prefers to grow'),
-  pastCrops: z.string().optional().describe('Crops grown in the past for rotation advice'),
+  location: z.string(),
+  soilType: z.string(),
+  season: z.string(),
+  landSize: z.string(),
+  irrigationAvailable: z.string(),
+  budgetLevel: z.string(),
+  preferredCrops: z.string().optional(),
+  pastCrops: z.string().optional(),
 });
 
 // ✅ Output Schema
 const RecommendCropsOutputSchema = z.object({
-  crops: z.array(z.string()).describe('A list of 3-4 recommended crops suitable for the conditions.'),
-  fertilizerSuggestions: z.string().describe('Specific fertilizer advice for the top recommended crop.'),
-  pestDiseaseControl: z.string().describe('Common pest and disease control measures for the recommended crops.'),
-  weatherPrecautions: z.string().describe('Precautions to take based on the likely weather for the season.'),
-  estimatedYield: z.string().describe('An estimated yield for the primary recommended crop.'),
-  marketAdvice: z.string().describe('Advice on when and where to sell the produce for better returns.'),
-  motivationalMessage: z.string().describe('A short, encouraging message for the farmer.'),
+  crops: z.array(z.string()),
+  fertilizerSuggestions: z.string(),
+  pestDiseaseControl: z.string(),
+  weatherPrecautions: z.string(),
+  estimatedYield: z.string(),
+  marketAdvice: z.string(),
+  motivationalMessage: z.string(),
 });
 
-// ✅ Main entry function
+// ✅ Main Export
 export async function recommendCrops(input) {
   const validation = RecommendCropsInputSchema.safeParse(input);
   if (!validation.success) {
@@ -45,15 +40,15 @@ export async function recommendCrops(input) {
   } catch (e) {
     console.error('❌ OpenRouter Error:', e);
     return {
-      error: 'An error occurred while communicating with the AI service. Please check the server logs and API key.',
+      error: '❌ Failed to communicate with AI. Please try again.',
     };
   }
 }
 
-// ✅ OpenRouter-based AI logic
+// ✅ OpenRouter Logic
 const recommendCropsFlow = async (input) => {
   const prompt = `
-You are an expert agricultural advisor in India. A farmer has provided the following details:
+You are an Indian agricultural advisor. A farmer shared these details:
 
 - Location: ${input.location}
 - Soil Type: ${input.soilType}
@@ -62,19 +57,23 @@ You are an expert agricultural advisor in India. A farmer has provided the follo
 - Irrigation Available: ${input.irrigationAvailable}
 - Budget Level: ${input.budgetLevel}
 ${input.preferredCrops ? `- Preferred Crops: ${input.preferredCrops}` : ''}
-${input.pastCrops ? `- Crops Grown Last Season: ${input.pastCrops}` : ''}
+${input.pastCrops ? `- Past Crops: ${input.pastCrops}` : ''}
 
-Your task is to provide:
-1. A list of 3–4 recommended crops suitable for the region and season.
+Please give:
+1. 3–4 crop suggestions that fit this situation.
 2. Fertilizer advice for the top crop.
-3. Pest and disease control tips for the crops.
-4. Weather precautions based on the season.
-5. Estimated yield for the primary crop.
-6. Market advice to maximize profit.
+3. Common pest and disease protection tips.
+4. Seasonal weather precautions.
+5. Estimated yield for the top crop.
+6. Tips on where and when to sell.
 7. A motivational message.
 
-🎯 Format the response as this exact JSON:
+⚠️ Important:
+- Use only **simple and clear English**.
+- Do **not** use Hindi or regional language.
+- Keep sentences short and easy for small farmers to understand.
 
+Return your answer in **this exact JSON format**:
 {
   "crops": ["...", "..."],
   "fertilizerSuggestions": "...",
@@ -95,29 +94,40 @@ Your task is to provide:
     body: JSON.stringify({
       model: 'mistralai/mistral-7b-instruct',
       messages: [
-        { role: 'system', content: 'You are a helpful agricultural assistant for Indian farmers.' },
-        { role: 'user', content: prompt },
+        {
+          role: 'system',
+          content: `You are a helpful agriculture assistant for Indian farmers. 
+          Use **only English**. 
+          Make sure your words are **simple** and **clear**. 
+          Avoid using Hindi. Keep advice short and practical.`,
+        },
+        {
+          role: 'user',
+          content: prompt,
+        },
       ],
     }),
   });
 
   const raw = await res.text();
-  console.log('🔍 OpenRouter Raw Response:', raw);
+  const parsed = JSON.parse(raw);
+  const content = parsed.choices?.[0]?.message?.content ?? '{}';
 
-  if (!res.ok) {
-    throw new Error(`OpenRouter API Error: ${res.status}`);
-  }
+  // ✅ Sanitize JSON
+  const sanitized = content
+    .replace(/[\b\f\n\r\t\v]/g, ' ')
+    .replace(/\\"/g, '"')
+    .replace(/\\n/g, ' ')
+    .trim();
 
   try {
-    const parsed = JSON.parse(raw);
-    const content = parsed.choices?.[0]?.message?.content ?? '{}';
-    const final = JSON.parse(content);
+    const final = JSON.parse(sanitized);
     return RecommendCropsOutputSchema.parse(final);
   } catch (err) {
     console.error('❌ JSON parse or validation failed:', err);
     return {
-      crops: [],
-      fertilizerSuggestions: '❌ Failed to parse response.',
+      crops: ['❌ Could not parse AI response.'],
+      fertilizerSuggestions: '',
       pestDiseaseControl: '',
       weatherPrecautions: '',
       estimatedYield: '',

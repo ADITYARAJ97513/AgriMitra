@@ -1,27 +1,23 @@
 'use server';
-/**
- * @fileOverview An AI agent to identify pest and disease threats and suggest preventative measures using OpenRouter.
- */
-
 import { z } from 'zod';
 
 // ✅ Input Schema
 const PestAndDiseaseAIInputSchema = z.object({
-  cropType: z.string().describe('The type of crop being grown.'),
-  growthStage: z.string().describe('The current growth stage of the crop.'),
-  symptomsObserved: z.string().describe('Any observed symptoms on the plants.'),
-  organicPreference: z.string().describe('Whether the farmer prefers organic solutions (Yes/No).'),
-  weatherConditions: z.string().optional().describe('Current weather conditions.'),
-  chemicalsUsedEarlier: z.string().optional().describe('Any chemicals used recently.'),
+  cropType: z.string(),
+  growthStage: z.string(),
+  symptomsObserved: z.string(),
+  organicPreference: z.string(),
+  weatherConditions: z.string().optional(),
+  chemicalsUsedEarlier: z.string().optional(),
 });
 
 // ✅ Output Schema
 const PestAndDiseaseAIOutputSchema = z.object({
-  pestThreats: z.array(z.string()).describe('A list of likely pest threats based on the input.'),
-  diseaseThreats: z.array(z.string()).describe('A list of likely disease threats based on the input.'),
-  preventativeMeasures: z.array(z.string()).describe('A list of measures to prevent these issues.'),
-  organicTreatments: z.array(z.string()).describe('A list of organic treatment options.'),
-  chemicalTreatments: z.array(z.string()).describe('A list of chemical treatment options. Provide only if organic preference is "No" or if it is an emergency.'),
+  pestThreats: z.array(z.string()),
+  diseaseThreats: z.array(z.string()),
+  preventativeMeasures: z.array(z.string()),
+  organicTreatments: z.array(z.string()),
+  chemicalTreatments: z.array(z.string()),
 });
 
 // ✅ Main Function
@@ -45,31 +41,31 @@ export async function pestAndDiseaseAI(input) {
   }
 }
 
-// ✅ OpenRouter-based Flow
+// ✅ AI Flow Function
 const pestAndDiseaseFlow = async (input) => {
   const prompt = `
-You are a plant pathologist and entomologist specializing in Indian agriculture. A farmer needs help identifying and managing threats.
+You are a pest and plant disease expert helping Indian farmers.
 
-Farmer's Report:
-- Crop: ${input.cropType}
+A farmer is growing ${input.cropType} crop. Please identify possible threats and prevention methods based on the report below:
+
 - Growth Stage: ${input.growthStage}
 - Symptoms: ${input.symptomsObserved}
 - Organic Preference: ${input.organicPreference}
-${input.weatherConditions ? `- Weather: ${input.weatherConditions}` : ''}
-${input.chemicalsUsedEarlier ? `- Chemicals Used Earlier: ${input.chemicalsUsedEarlier}` : ''}
+${input.weatherConditions ? `- Weather Conditions: ${input.weatherConditions}` : ''}
+${input.chemicalsUsedEarlier ? `- Previously Used Chemicals: ${input.chemicalsUsedEarlier}` : ''}
 
-Please respond with this JSON format:
+Your response must be in **simple English only**, no Hindi. Avoid complex terms. Keep it clear and easy for rural farmers to follow.
+
+Return response in this JSON format exactly:
+
 {
-  "pestThreats": ["...", "..."],
-  "diseaseThreats": ["...", "..."],
-  "preventativeMeasures": ["...", "..."],
-  "organicTreatments": ["...", "..."],
-  "chemicalTreatments": ["...", "..."]
+  "pestThreats": ["..."],
+  "diseaseThreats": ["..."],
+  "preventativeMeasures": ["..."],
+  "organicTreatments": ["..."],
+  "chemicalTreatments": ["..."]
 }
-
-Important:
-- If organicPreference is "Yes", keep chemicalTreatments empty unless symptoms are severe.
-`;
+Only return the JSON. No explanation.`;
 
   const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
     method: 'POST',
@@ -80,15 +76,13 @@ Important:
     body: JSON.stringify({
       model: 'mistralai/mistral-7b-instruct',
       messages: [
-        { role: 'system', content: 'You are an agricultural pest and disease expert.' },
+        { role: 'system', content: 'You are a helpful agricultural assistant. Use only simple English.' },
         { role: 'user', content: prompt },
       ],
     }),
   });
 
   const raw = await res.text();
-  console.log('🔍 OpenRouter Raw Response:', raw);
-
   if (!res.ok) {
     throw new Error(`OpenRouter API error: ${res.status}`);
   }
@@ -96,16 +90,41 @@ Important:
   try {
     const parsed = JSON.parse(raw);
     const content = parsed.choices?.[0]?.message?.content ?? '{}';
-    const final = JSON.parse(content);
-    return PestAndDiseaseAIOutputSchema.parse(final);
+
+    const sanitized = content
+      .replace(/[\b\f\n\r\t\v]/g, ' ')
+      .replace(/\\"/g, '"')
+      .replace(/\\n/g, ' ')
+      .trim();
+
+    let final;
+    try {
+      final = JSON.parse(sanitized);
+    } catch (err) {
+      console.error('❌ Cleaned JSON parse error:', err);
+      return {
+        error: 'AI returned badly formatted data. Please try again.',
+      };
+    }
+
+    const stringifyArray = (arr) =>
+      Array.isArray(arr)
+        ? arr.map((item) => (typeof item === 'string' ? item : JSON.stringify(item)))
+        : [];
+
+    const cleanOutput = {
+      pestThreats: stringifyArray(final.pestThreats),
+      diseaseThreats: stringifyArray(final.diseaseThreats),
+      preventativeMeasures: stringifyArray(final.preventativeMeasures),
+      organicTreatments: stringifyArray(final.organicTreatments),
+      chemicalTreatments: stringifyArray(final.chemicalTreatments),
+    };
+
+    return PestAndDiseaseAIOutputSchema.parse(cleanOutput);
   } catch (err) {
-    console.error('❌ Failed to parse OpenRouter response:', err);
+    console.error('❌ Final Output Parse Error:', err);
     return {
-      pestThreats: ['❌ Failed to parse AI response.'],
-      diseaseThreats: [],
-      preventativeMeasures: [],
-      organicTreatments: [],
-      chemicalTreatments: [],
+      error: 'Something went wrong while processing AI response.',
     };
   }
 };
